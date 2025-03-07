@@ -1,0 +1,4 @@
+// {
+//     // 这个配置是为了 pylint 可以正确解析包的绝对导入
+//     "python.analysis.extraPaths": ["${workspaceFolder}/inheritance/employee_management"]
+// }
