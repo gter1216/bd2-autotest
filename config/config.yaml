@@ -4,11 +4,29 @@
 basic:
   # basic settings
   base_url: "http://localhost:4430"  # Base URL for BD2 server
-  username: "charles.xu2"  # Username for BD2 server
-  password: "ostem@00"  # Password for BD2 server
+  vm_username: "charles.xu2"  # VM Username for BD2 server
+  vm_password: "fat$1216XIAO"  # VM Password for BD2 server
+  sso_username: "charles.xu2"  # SSO Username for BD2 server
+  sso_password: "fat$1216XIAO"  # SSO Password for BD2 server
 
 log:
-  level: "DEBUG"  # Global log level
+  # Available log levels (from most to least verbose):
+  # - DEBUG: Detailed information for debugging (includes all levels below)
+  #         Shows detailed flow of the program execution
+  #         Example: Parameter values, API responses, configuration details
+  # - INFO: Confirmation that things are working as expected (includes all levels below)
+  #         Shows important operations and state changes
+  #         Example: Login success/failure, task start/end
+  # - WARNING: Indication that something unexpected happened (includes all levels below)
+  #           Shows potential issues that don't affect the program's operation
+  #           Example: Using deprecated features, resource usage high
+  # - ERROR: Due to a more serious problem, the software couldn't perform some function
+  #          Shows errors that affect the program's operation but don't crash it
+  #          Example: Failed operations, missing required parameters
+  # - CRITICAL: A serious error that might prevent the program from running
+  #             Shows errors that might crash the program
+  #             Example: Unable to connect to server, configuration missing
+  level: "INFO"  # Global log level (can be overridden by --debug command line option)
   log_to_console: true  # Enable log output to console
   log_to_file: true  # Enable log output to file
   base_log_dir: "logs"  # Root directory for log files

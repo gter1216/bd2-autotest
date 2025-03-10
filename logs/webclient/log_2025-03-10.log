@@ -1,0 +1,49 @@
+[2025-03-10 10:51:10] [bd2_client_sim.py] DEBUG - 初始化BD2ClientSim
+[2025-03-10 10:51:10] [bd2_client_sim.py] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 10:51:10] [bd2_client_sim.py] DEBUG - 开始解析命令行参数
+[2025-03-10 10:51:10] [bd2_client_sim.py] DEBUG - 解析到任务类型: auth, 操作: login
+[2025-03-10 10:51:10] [bd2_client_sim.py] INFO - 执行任务: auth login
+[2025-03-10 10:51:10] [bd2_client_sim.py] DEBUG - 任务参数: {}
+[2025-03-10 10:51:10] [bd2_client_sim.py] INFO - 开始登录流程
+[2025-03-10 10:51:10] [bd2_client_sim.py] DEBUG - VM用户名: charles.xu2, SSO用户名: charles.xu2
+[2025-03-10 10:51:12] [bd2_client_sim.py] ERROR - 登录失败: VM登录失败
+[2025-03-10 10:53:10.298] [bd2_client_sim] DEBUG - 初始化BD2ClientSim
+[2025-03-10 10:53:10.298] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 10:53:10.299] [bd2_client_sim] DEBUG - 开始解析命令行参数
+[2025-03-10 10:53:10.299] [bd2_client_sim] DEBUG - 解析到任务类型: auth, 操作: login
+[2025-03-10 10:53:10.299] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 10:53:10.299] [bd2_client_sim] DEBUG - 任务参数: {}
+[2025-03-10 10:53:10.299] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 10:53:10.299] [bd2_client_sim] DEBUG - VM用户名: charles.xu2, SSO用户名: charles.xu2
+[2025-03-10 10:53:12.310] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 10:53:35.308] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 10:53:35.308] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 10:53:35.308] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 10:53:37.320] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 10:53:46.931] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 10:53:46.931] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 10:53:46.931] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 10:53:48.942] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 10:53:51.635] [bd2_client_sim] DEBUG - 初始化BD2ClientSim
+[2025-03-10 10:53:51.635] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 10:53:51.636] [bd2_client_sim] DEBUG - 开始解析命令行参数
+[2025-03-10 10:53:51.636] [bd2_client_sim] DEBUG - 解析到任务类型: auth, 操作: login
+[2025-03-10 10:53:51.636] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 10:53:51.636] [bd2_client_sim] DEBUG - 任务参数: {}
+[2025-03-10 10:53:51.636] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 10:53:51.636] [bd2_client_sim] DEBUG - VM用户名: charles.xu2, SSO用户名: charles.xu2
+[2025-03-10 10:53:53.646] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 10:57:01.429] [bd2_client_sim] DEBUG - 初始化BD2ClientSim
+[2025-03-10 10:57:01.429] [bd2_client_sim] INFO - 使用baseURL: http://localhost:4430
+[2025-03-10 10:57:01.429] [bd2_client_sim] DEBUG - 开始解析命令行参数
+[2025-03-10 10:57:01.429] [bd2_client_sim] DEBUG - 解析到任务类型: auth, 操作: login
+[2025-03-10 10:57:01.430] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 10:57:01.430] [bd2_client_sim] DEBUG - 任务参数: {}
+[2025-03-10 10:57:01.430] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 10:57:01.430] [bd2_client_sim] DEBUG - VM用户名: charles.xu2, SSO用户名: charles.xu2
+[2025-03-10 10:57:03.442] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 11:08:17.194] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 11:08:17.194] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 11:08:17.195] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 11:08:19.206] [bd2_client_sim] ERROR - 登录失败: VM登录失败
+[2025-03-10 12:18:30.657] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430

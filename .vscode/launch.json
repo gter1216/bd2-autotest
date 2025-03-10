@@ -10,12 +10,14 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "args": [
+                "auth", "login"
+                // , "auth", "login", "--log-level", "INFO",
+                // , "auth", "login", "--log-level", "DEBUG"
+            ],
             // "cwd": "${fileDirname}",  // 设置工作目录为当前文件(F5运行main.py 时就是main.py的目录)的目录
             //                           // 跟 from ... import ... 没有关系，跟 open 文件有关系 
             //                           // 只对 F5 debug 模式生效，不对 run 模式生效
-            // "args": [
-            //     // "${command:pickArgs}"
-            // ],
             // "env": {
             //     // 这个配置是为了单独跑 developer.py // 跟 open 没有关系，跟import from 有关系
             //     "PYTHONPATH": "${workspaceFolder}/inheritance/employee_management",

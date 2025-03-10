@@ -9,8 +9,9 @@ class EndpointManager:
     """Manage API endpoints"""
 
     ENDPOINTS = {
-        "auth_login": "/auth/login",
-        "auth_logout": "/auth/logout",
+        "vm_login": "/api/v1/login",
+        "sso_login": "/api/v1/sso_auth",
+        # "auth_logout": "/auth/logout",
         # "flash_status": "/flash/status/{task_id}",
         # "diagnosis_run": "/diagnosis/run",
         "certificate_install": "/certificate/install",
