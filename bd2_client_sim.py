@@ -62,7 +62,7 @@ class BD2ClientSim:
                 elif action == "get_login_status":
                     self.logger.info("开始检查登录状态")
                     result = self.auth.get_login_status()
-                    if result["status"] == "OK":
+                    if result["status"] == "success":
                         self.logger.info("登录状态正常")
                     else:
                         self.logger.warning("未登录或登录已过期")

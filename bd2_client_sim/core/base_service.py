@@ -158,10 +158,16 @@ class BaseService:
     def _send_request(self, method, endpoint, data=None, headers=None):
         """Generic HTTP request method
         
+        Args:
+            method: HTTP 方法
+            endpoint: API 端点
+            data: 请求数据
+            headers: 请求头
+            
         Returns:
             tuple: (status_code, response_data)
-            - status_code: HTTP 状态码
-            - response_data: 响应数据，可能是 JSON 对象或 None
+                - status_code: HTTP 状态码
+                - response_data: 响应数据，可能是 JSON 对象或 None
         """
         url = f"{self.base_url}{endpoint}"
         headers = self._get_headers(headers)
@@ -186,20 +192,15 @@ class BaseService:
                 else:
                     self._save_session(response.cookies)
             
-            response.raise_for_status()
-            
             # 尝试解析响应数据
             try:
                 return response.status_code, response.json()
             except:
                 return response.status_code, None
                 
-        except requests.RequestException as e:
-            if isinstance(e, requests.exceptions.HTTPError):
-                return e.response.status_code, e.response.json() if e.response.text else None
-            else:
-                print(f"\n请求失败: {str(e)}\n")
-            return None, None
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"请求失败: {str(e)}")
+            raise
 
     def post(self, endpoint, data=None, headers=None):
         """Send POST request"""

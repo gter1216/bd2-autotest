@@ -41,16 +41,19 @@ class AuthService(BaseService):
             self.logger.error("未找到可用的登录凭证")
             return {"error": "未找到可用的登录凭证"}
             
-        username = creds.get("username")
-        password = creds.get("password")
+        vm_username = creds.get("vm_username")
+        vm_password = creds.get("vm_password")
+        sso_username = creds.get("sso_username")
+        sso_password = creds.get("sso_password")
         self.logger.info("使用保存的凭证登录")
         
-        # 第一步：VM 登录
-        vm_status_code, vm_response = self.post("/api/v1/login", {
-            "username": username,
-            "password": password,
-            "type": "vm"
-        })
+        # 第一步：VM 登录（不带任何 cookie）
+        vm_url = EndpointManager.get_endpoint("vm_login")
+        self.logger.debug(f"开始VM登录: {vm_url}")
+        vm_status_code, vm_response = self.post(vm_url, {
+            "username": vm_username,
+            "password": vm_password
+        })  # 清空 cookie
         
         # 检查 VM 登录结果
         if vm_status_code not in [200, 401]:
@@ -59,20 +62,23 @@ class AuthService(BaseService):
             
         self.logger.info("VM登录完成，继续执行 SSO 登录")
             
-        # 第二步：SSO 登录
-        sso_status_code, sso_response = self.post("/api/v1/login", {
-            "username": username,
-            "password": password,
-            "type": "sso"
-        })
+        # 第二步：SSO 登录（使用 VM 登录后服务器返回的新 cookie）
+        sso_url = EndpointManager.get_endpoint("sso_login")
+        self.logger.debug(f"开始SSO登录: {sso_url}")
+        sso_status_code, sso_response = self.post(sso_url, {
+            "username": sso_username, 
+            "password": sso_password})
         
-        if sso_status_code == 200 and sso_response:
-            self.logger.info("SSO登录成功")
-            # 保存凭证
-            self.credential_manager.save_user_credentials(username, password)
-            return {"status": "success"}
-            
-        return {"error": "SSO登录失败"}
+        if sso_status_code != 200:
+            self.logger.error(f"SSO登录失败，状态码: {sso_status_code}")
+            return {"error": f"SSO登录失败，状态码: {sso_status_code}"}
+
+        # # 保存凭证
+        # self.credential_manager.save_user_credentials(vm_username, vm_password, 
+        #                                               sso_username, sso_password)
+        self.logger.info("SSO登录成功")
+
+        return sso_response
 
     def logout(self):
         """登出系统
