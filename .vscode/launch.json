@@ -13,8 +13,9 @@
             "args": [
                 // "auth", "login"
                 // "auth", "login", "--log-level", "INFO"
-                "auth", "login", "--log-level", "DEBUG"
+                // "auth", "login", "--log-level", "DEBUG"
                 // "auth", "get_login_status", "--log-level", "DEBUG"
+                "auth", "get_vehicle_status", "--log-level", "DEBUG"
             ],
             // "cwd": "${fileDirname}",  // 设置工作目录为当前文件(F5运行main.py 时就是main.py的目录)的目录
             //                           // 跟 from ... import ... 没有关系，跟 open 文件有关系 

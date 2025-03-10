@@ -47,13 +47,14 @@ class Result:
         return cls(success=True, data=data)
 
     @classmethod
-    def error(cls, error: str) -> 'Result':
+    def error(cls, data: Optional[Dict[str, Any]] = None, error: str = None) -> 'Result':
         """创建错误结果
         
         Args:
+            data: 响应数据（可选）
             error: 错误信息
             
         Returns:
             Result: 错误结果对象
         """
-        return cls(success=False, error=error) 
+        return cls(success=False, data=data, error=error) 

@@ -126,22 +126,22 @@ class AuthService(BaseService):
         status_code, response = self.get(vehicle_status_url)
         if status_code != 200:
             self.logger.error(f"获取车辆状态失败，状态码: {status_code}")
-            return Result.error(f"获取车辆状态失败，状态码: {status_code}")
+            return Result.error(response, f"获取车辆状态失败，状态码: {status_code}")
             
         if not response or not isinstance(response, dict):
             self.logger.error("车辆状态响应数据格式错误")
-            return Result.error("车辆状态响应数据格式错误")
+            return Result.error(response, "车辆状态响应数据格式错误")
             
         vehicle_connected = response.get("vehicleConnected", False)
         faults = response.get("faults", -1)
         
         if not vehicle_connected:
             self.logger.error("车辆未连接")
-            return Result.error("车辆未连接")
+            return Result.error(response, "车辆未连接")
             
         if faults > 0:
             self.logger.error(f"车辆存在 {faults} 个故障")
-            return Result.error(f"车辆存在 {faults} 个故障")
+            return Result.error(response, f"车辆存在 {faults} 个故障")
             
         self.logger.info("车辆状态正常")
         return Result.success(response)
