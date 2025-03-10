@@ -199,6 +199,19 @@ class CLIParser:
             help="设置日志级别（优先级高于配置文件）"
         )
 
+        # 添加获取车辆状态命令
+        vehicle_status_parser = auth_subparsers.add_parser("get_vehicle_status", 
+            help="获取车辆状态",
+            description="获取车辆的状态信息",
+            usage="%(prog)s [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
+        vehicle_status_parser.add_argument(
+            "--log-level",
+            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+            help="设置日志级别（优先级高于配置文件）"
+        )
+
         # 证书任务 cert
         cert_parser = subparsers.add_parser("cert", 
             help="证书管理",

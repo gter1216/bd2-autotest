@@ -11,6 +11,7 @@ class EndpointManager:
     ENDPOINTS = {
         "vm_login": "/api/v1/login",
         "sso_login": "/api/v1/sso_auth",
+        "vehicle_status": "/api/v1/app/vehicle_health/status",
         # "auth_logout": "/auth/logout",
         # "flash_status": "/flash/status/{task_id}",
         # "diagnosis_run": "/diagnosis/run",

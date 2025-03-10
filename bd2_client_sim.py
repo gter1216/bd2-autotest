@@ -63,9 +63,17 @@ class BD2ClientSim:
                     self.logger.info("开始检查登录状态")
                     result = self.auth.get_login_status()
                     if not result.success:
-                        self.logger.warning("未登录或登录已过期")
+                        self.logger.error("未登录或登录已过期")
                     else:
                         self.logger.info("登录状态正常")
+                    return result.to_dict()
+                elif action == "get_vehicle_status":
+                    self.logger.info("开始检查车辆状态")
+                    result = self.auth.get_vehicle_status()
+                    if not result.success:
+                        self.logger.error(f"车辆状态异常: {result.error}")
+                    else:
+                        self.logger.info("车辆状态正常")
                     return result.to_dict()
 
             elif task_type == "cert":

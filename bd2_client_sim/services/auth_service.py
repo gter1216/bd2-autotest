@@ -111,3 +111,37 @@ class AuthService(BaseService):
             self.logger.info("登录状态: OK")
             return Result.success(response)
         return Result.error("登录状态: NOK")
+
+    def get_vehicle_status(self):
+        """检查车辆状态
+        
+        Returns:
+            Result: 包含车辆状态的对象
+                - 成功时返回 Result(success=True, data=response_data)
+                - 失败时返回 Result(success=False, error="错误信息")
+        """
+        self.logger.info("检查车辆状态")
+        vehicle_status_url = EndpointManager.get_endpoint("vehicle_status")
+        self.logger.debug(f"获取车辆状态: {vehicle_status_url}")
+        status_code, response = self.get(vehicle_status_url)
+        if status_code != 200:
+            self.logger.error(f"获取车辆状态失败，状态码: {status_code}")
+            return Result.error(f"获取车辆状态失败，状态码: {status_code}")
+            
+        if not response or not isinstance(response, dict):
+            self.logger.error("车辆状态响应数据格式错误")
+            return Result.error("车辆状态响应数据格式错误")
+            
+        vehicle_connected = response.get("vehicleConnected", False)
+        faults = response.get("faults", -1)
+        
+        if not vehicle_connected:
+            self.logger.error("车辆未连接")
+            return Result.error("车辆未连接")
+            
+        if faults > 0:
+            self.logger.error(f"车辆存在 {faults} 个故障")
+            return Result.error(f"车辆存在 {faults} 个故障")
+            
+        self.logger.info("车辆状态正常")
+        return Result.success(response)
