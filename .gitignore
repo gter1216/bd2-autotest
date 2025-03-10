@@ -2,7 +2,7 @@
 logs/
 
 # Session data
-.session/
+/var/session/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

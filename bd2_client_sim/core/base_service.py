@@ -70,9 +70,9 @@ class BaseService:
     def _init_session_file(cls):
         """初始化会话文件路径"""
         if cls._session_file is None:
-            # 在项目根目录下创建.session目录
+            # 在 var/session 目录下存储会话文件
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            session_dir = os.path.join(project_root, '.session')
+            session_dir = os.path.join(project_root, 'var', 'session')
             os.makedirs(session_dir, exist_ok=True)
             cls._session_file = os.path.join(session_dir, 'session.pkl')
 

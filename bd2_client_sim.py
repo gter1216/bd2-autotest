@@ -44,13 +44,8 @@ class BD2ClientSim:
             if task_type == "auth":
                 if action == "login":
                     self.logger.info("开始登录流程")
-                    # 从配置文件获取VM和SSO的用户名密码
-                    vm_username = CONFIG.get("basic.vm_username")
-                    vm_password = CONFIG.get("basic.vm_password")
-                    sso_username = CONFIG.get("basic.sso_username")
-                    sso_password = CONFIG.get("basic.sso_password")
-                    self.logger.debug(f"VM用户名: {vm_username}, SSO用户名: {sso_username}")
-                    result = self.auth.login(vm_username, vm_password, sso_username, sso_password)
+                    # 让 AuthService 处理凭据获取
+                    result = self.auth.login()
                     if "error" in result:
                         self.logger.error(f"登录失败: {result['error']}")
                     else:
