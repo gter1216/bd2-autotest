@@ -59,6 +59,14 @@ class BD2ClientSim:
                     else:
                         self.logger.error("登出失败")
                     return result
+                elif action == "get_login_status":
+                    self.logger.info("开始检查登录状态")
+                    result = self.auth.get_login_status()
+                    if result["status"] == "OK":
+                        self.logger.info("登录状态正常")
+                    else:
+                        self.logger.warning("未登录或登录已过期")
+                    return result
 
             elif task_type == "cert":
                 if action == "deploy":

@@ -37,6 +37,7 @@ class BaseService:
             f"{method} {url}",
             "Headers:"
         ]
+        # 显示所有请求头，包括 Cookie
         for key, value in headers.items():
             message.append(f"    {key}: {value}")
         if data:
@@ -85,10 +86,22 @@ class BaseService:
                 with open(cls._session_file, 'rb') as f:
                     session_data = pickle.load(f)
                     if session_data.get('expires_at', datetime.now()) > datetime.now():
-                        cls._shared_session = requests.Session()
-                        cls._shared_session.cookies.update(session_data.get('cookies', {}))
+                        # 创建新的 session
+                        session = requests.Session()
+                        session.verify = False  # 禁用 SSL 验证
+                        requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+                        # 更新 cookie
+                        cookies = session_data.get('cookies', {})
+                        session.cookies.update(cookies)
+                        # 更新类变量
+                        cls._shared_session = session
+                        # 添加调试日志
+                        logger = cls._get_logger()
+                        logger.debug(f"从文件加载会话成功，cookies: {cookies}")
                         return True
-            except Exception:
+            except Exception as e:
+                logger = cls._get_logger()
+                logger.error(f"加载会话失败: {str(e)}")
                 pass
         return False
 
@@ -116,13 +129,14 @@ class BaseService:
         self.base_url = base_url
         # 使用共享会话
         if BaseService._shared_session is None:
-            BaseService._shared_session = requests.Session()
-            # 禁用 SSL 验证
-            BaseService._shared_session.verify = False
-            # 禁用 SSL 验证警告
-            requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
-            # 尝试加载已保存的会话
-            self._load_session()
+            # 先尝试加载已保存的会话
+            if not BaseService._load_session():
+                # 如果没有已保存的会话，创建新的
+                BaseService._shared_session = requests.Session()
+                # 禁用 SSL 验证
+                BaseService._shared_session.verify = False
+                # 禁用 SSL 验证警告
+                requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
         self.session = BaseService._shared_session
 
     def _get_headers(self, headers=None):
@@ -133,12 +147,22 @@ class BaseService:
             "Content-Type": "application/json",
             "User-Agent": "local/win32/PRTKF00WBK00NN/1.3.1/5CG4375BR5"
         }
+        # 添加 cookie 到请求头
+        if self.session.cookies:
+            cookie_str = '; '.join([f"{cookie.name}={cookie.value}" for cookie in self.session.cookies])
+            default_headers["Cookie"] = cookie_str
         if headers:
             default_headers.update(headers)
         return default_headers
 
-    def _send_request(self, method, endpoint, data=None, headers=None, ignore_401=False):
-        """Generic HTTP request method"""
+    def _send_request(self, method, endpoint, data=None, headers=None):
+        """Generic HTTP request method
+        
+        Returns:
+            tuple: (status_code, response_data)
+            - status_code: HTTP 状态码
+            - response_data: 响应数据，可能是 JSON 对象或 None
+        """
         url = f"{self.base_url}{endpoint}"
         headers = self._get_headers(headers)
         
@@ -162,40 +186,33 @@ class BaseService:
                 else:
                     self._save_session(response.cookies)
             
-            # 检查响应状态
-            if response.status_code == 401 and not ignore_401:  # Unauthorized
-                print("\n会话已过期或无效，请先执行登录命令：")
-                print("python bd2_client_sim.py auth login\n")
-                return None
-                
             response.raise_for_status()
-            return response.json()
+            
+            # 尝试解析响应数据
+            try:
+                return response.status_code, response.json()
+            except:
+                return response.status_code, None
+                
         except requests.RequestException as e:
             if isinstance(e, requests.exceptions.HTTPError):
-                if e.response.status_code == 401 and ignore_401:
-                    return e.response.json()
-                elif e.response.status_code == 401:
-                    print("\n会话已过期或无效，请先执行登录命令：")
-                    print("python bd2_client_sim.py auth login\n")
+                return e.response.status_code, e.response.json() if e.response.text else None
             else:
                 print(f"\n请求失败: {str(e)}\n")
-            return None
+            return None, None
 
-    def post(self, endpoint, data=None, headers=None, ignore_401=False):
+    def post(self, endpoint, data=None, headers=None):
         """Send POST request"""
-        return self._send_request("POST", endpoint, data, headers, ignore_401)
+        return self._send_request("POST", endpoint, data, headers)
 
     def get(self, endpoint, headers=None):
         """Send GET request"""
-        # self.logger.log_info(f"GET {endpoint}")
         return self._send_request("GET", endpoint, None, headers)
 
     def put(self, endpoint, data=None, headers=None):
         """Send PUT request"""
-        # self.logger.log_info(f"PUT {endpoint} - DATA: {data}")
         return self._send_request("PUT", endpoint, data, headers)
 
     def delete(self, endpoint, headers=None):
         """Send DELETE request"""
-        # self.logger.log_info(f"DELETE {endpoint}")
         return self._send_request("DELETE", endpoint, None, headers)

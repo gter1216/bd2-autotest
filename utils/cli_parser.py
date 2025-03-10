@@ -56,10 +56,14 @@ class CLIParser:
             elif action == "logout":
                 print("\n登出命令示例:")
                 print("  python bd2_client_sim.py auth logout --log-level DEBUG")
+            elif action == "get_login_status":
+                print("\n检查登录状态命令示例:")
+                print("  python bd2_client_sim.py auth get_login_status --log-level DEBUG")
             else:
                 print("\n认证命令示例:")
                 print("  python bd2_client_sim.py auth login --log-level DEBUG")
                 print("  python bd2_client_sim.py auth logout")
+                print("  python bd2_client_sim.py auth get_login_status")
         elif command_type == "cert":
             if action == "deploy":
                 print("\n证书部署命令示例:")
@@ -177,6 +181,19 @@ class CLIParser:
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
         logout_parser.add_argument(
+            "--log-level",
+            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+            help="设置日志级别（优先级高于配置文件）"
+        )
+
+        # 添加检查登录状态命令
+        status_parser = auth_subparsers.add_parser("get_login_status", 
+            help="检查登录状态",
+            description="检查当前用户的登录状态",
+            usage="%(prog)s [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
+        status_parser.add_argument(
             "--log-level",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
             help="设置日志级别（优先级高于配置文件）"
