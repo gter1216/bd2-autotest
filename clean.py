@@ -7,22 +7,7 @@
 
 import os
 import shutil
-import time
 from datetime import datetime, timedelta
-import logging
-
-def setup_logger():
-    """设置日志器"""
-    logger = logging.getLogger('cleaner')
-    logger.setLevel(logging.INFO)
-    
-    formatter = logging.Formatter('[%(asctime)s] [%(name)s] %(levelname)s - %(message)s')
-    
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    
-    return logger
 
 def clean_old_logs(base_dir, days=7):
     """
@@ -30,7 +15,6 @@ def clean_old_logs(base_dir, days=7):
     :param base_dir: 日志根目录
     :param days: 保留的天数
     """
-    logger = logging.getLogger('cleaner')
     cutoff_date = datetime.now() - timedelta(days=days)
     
     try:
@@ -50,27 +34,25 @@ def clean_old_logs(base_dir, days=7):
                     # 将日期字符串转换为datetime对象
                     dir_date = datetime.strptime(date_dir, "%Y-%m-%d")
                     if dir_date < cutoff_date:
-                        logger.info(f"删除过期日志目录: {date_path}")
+                        print(f"删除过期日志目录: {date_path}")
                         shutil.rmtree(date_path)
                 except ValueError:
-                    logger.warning(f"跳过无效的日期目录: {date_path}")
+                    print(f"跳过无效的日期目录: {date_path}")
                     continue
             
             # 如果环境目录为空，也删除它
             if not os.listdir(env_path):
-                logger.info(f"删除空的环境目录: {env_path}")
+                print(f"删除空的环境目录: {env_path}")
                 os.rmdir(env_path)
                 
     except Exception as e:
-        logger.error(f"清理日志时发生错误: {str(e)}")
+        print(f"清理日志时发生错误: {str(e)}")
 
 def clean_python_cache(start_dir):
     """
     清除Python缓存文件
     :param start_dir: 开始清理的目录
     """
-    logger = logging.getLogger('cleaner')
-    
     try:
         for root, dirs, files in os.walk(start_dir, topdown=True):
             # 清理目录
@@ -80,7 +62,7 @@ def clean_python_cache(start_dir):
                     dir_name.endswith('.egg-info') or 
                     dir_name in ['.pytest_cache', '.coverage', '.mypy_cache']):
                     dir_path = os.path.join(root, dir_name)
-                    logger.info(f"删除缓存目录: {dir_path}")
+                    print(f"删除缓存目录: {dir_path}")
                     shutil.rmtree(dir_path)
                     dirs_to_remove.append(dir_name)
             
@@ -92,34 +74,32 @@ def clean_python_cache(start_dir):
             for file_name in files:
                 if file_name.endswith(('.pyc', '.pyo', '.pyd')):
                     file_path = os.path.join(root, file_name)
-                    logger.info(f"删除缓存文件: {file_path}")
+                    print(f"删除缓存文件: {file_path}")
                     os.remove(file_path)
     
     except Exception as e:
-        logger.error(f"清理Python缓存时发生错误: {str(e)}")
+        print(f"清理Python缓存时发生错误: {str(e)}")
 
 def main():
     """主函数"""
-    logger = setup_logger()
-    
     # 获取项目根目录（当前目录，因为脚本在根目录下）
     project_root = os.path.dirname(os.path.abspath(__file__))
     logs_dir = os.path.join(project_root, 'logs')
     
-    logger.info("开始清理...")
+    print("开始清理...")
     
     # 清理旧日志
     if os.path.exists(logs_dir):
-        logger.info("清理7天前的日志...")
+        print("清理7天前的日志...")
         clean_old_logs(logs_dir)
     else:
-        logger.info("日志目录不存在，跳过日志清理")
+        print("日志目录不存在，跳过日志清理")
     
     # 清理Python缓存
-    logger.info("清理Python缓存文件...")
+    print("清理Python缓存文件...")
     clean_python_cache(project_root)
     
-    logger.info("清理完成!")
+    print("清理完成!")
 
 if __name__ == '__main__':
     main() 

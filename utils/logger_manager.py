@@ -95,7 +95,7 @@ class LoggerManager:
             )
             
             file_handler = logging.FileHandler(log_file, encoding='utf-8')
-            file_handler.setLevel(logging.DEBUG)  # 文件日志始终使用 DEBUG 级别
+            file_handler.setLevel(getattr(logging, log_level))
             file_handler.setFormatter(formatter)
             LoggerManager._logger.addHandler(file_handler)
 

@@ -1,0 +1,4 @@
+[2025-03-10 13:14:14.507] [bd2_client_sim] INFO - 使用基础URL: http://localhost:4430
+[2025-03-10 13:14:14.508] [bd2_client_sim] INFO - 执行任务: auth login
+[2025-03-10 13:14:14.508] [bd2_client_sim] INFO - 开始登录流程
+[2025-03-10 13:14:16.528] [bd2_client_sim] ERROR - 登录失败: VM登录失败
