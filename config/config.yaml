@@ -3,7 +3,7 @@
 
 basic:
   # basic settings
-  base_url: "http://localhost:4430"  # Base URL for BD2 server
+  base_url: "https://localhost:4430"  # Base URL for BD2 server
   vm_username: "charles.xu2"  # VM Username for BD2 server
   vm_password: "fat$1216XIAO"  # VM Password for BD2 server
   sso_username: "charles.xu2"  # SSO Username for BD2 server
