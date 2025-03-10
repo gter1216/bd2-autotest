@@ -3,10 +3,12 @@ Description: This module handles authentication functionalities.
 
 Changelog:
 - 2025-03-07: Initial creation.
+- 2025-03-10: Update to use Result class for responses.
 """
 
 from ..core.base_service import BaseService
 from ..core.endpoint_manager import EndpointManager
+from ..core.result import Result
 from utils.credential_manager import CredentialManager
 
 class AuthService(BaseService):
@@ -29,9 +31,9 @@ class AuthService(BaseService):
            - 否则登录失败
            
         Returns:
-            dict: 包含登录结果的信息
-                - 成功时返回 {"status": "success"}
-                - 失败时返回 {"error": "错误信息"}
+            Result: 包含登录结果的对象
+                - 成功时返回 Result(success=True, data=response_data)
+                - 失败时返回 Result(success=False, error="错误信息")
         """
         self.logger.info("开始登录")
         
@@ -39,7 +41,7 @@ class AuthService(BaseService):
         creds = self.credential_manager.get_current_credentials()
         if not creds:
             self.logger.error("未找到可用的登录凭证")
-            return {"error": "未找到可用的登录凭证"}
+            return Result.error("未找到可用的登录凭证")
             
         vm_username = creds.get("vm_username")
         vm_password = creds.get("vm_password")
@@ -53,12 +55,12 @@ class AuthService(BaseService):
         vm_status_code, vm_response = self.post(vm_url, {
             "username": vm_username,
             "password": vm_password
-        })  # 清空 cookie
+        })
         
         # 检查 VM 登录结果
         if vm_status_code not in [200, 401]:
             self.logger.error(f"VM登录失败，状态码: {vm_status_code}")
-            return {"error": f"VM登录失败，状态码: {vm_status_code}"}
+            return Result.error(f"VM登录失败，状态码: {vm_status_code}")
             
         self.logger.info("VM登录完成，继续执行 SSO 登录")
             
@@ -67,46 +69,45 @@ class AuthService(BaseService):
         self.logger.debug(f"开始SSO登录: {sso_url}")
         sso_status_code, sso_response = self.post(sso_url, {
             "username": sso_username, 
-            "password": sso_password})
+            "password": sso_password
+        })
         
         if sso_status_code != 200:
             self.logger.error(f"SSO登录失败，状态码: {sso_status_code}")
-            return {"error": f"SSO登录失败，状态码: {sso_status_code}"}
+            return Result.error(f"SSO登录失败，状态码: {sso_status_code}")
 
-        # # 保存凭证
-        # self.credential_manager.save_user_credentials(vm_username, vm_password, 
-        #                                               sso_username, sso_password)
         self.logger.info("SSO登录成功")
-
-        return sso_response
+        return Result.success(sso_response)
+        # return Result.success()
 
     def logout(self):
         """登出系统
         
         Returns:
-            dict: 包含登出结果的信息
-                - 成功时返回 {"status": "success"}
-                - 失败时返回 {"error": "错误信息"}
+            Result: 包含登出结果的对象
+                - 成功时返回 Result(success=True)
+                - 失败时返回 Result(success=False, error="错误信息")
         """
         self.logger.info("开始登出")
         status_code, response = self.post("/api/v1/logout")
         if status_code == 200:
             self.logger.info("登出成功")
-            # 清除凭证
-            self.credential_manager.remove_user_credentials()
-            return {"status": "success"}
-        return {"error": "登出失败"}
+            # # 清除凭证
+            # self.credential_manager.remove_user_credentials()
+            return Result.success(response)
+        return Result.error("登出失败")
 
     def get_login_status(self):
         """检查登录状态
         
         Returns:
-            dict: 包含登录状态的信息
-                - 成功时返回 {"status": "success"}
-                - 失败时返回 {"error": "错误信息"}
+            Result: 包含登录状态的对象
+                - 成功时返回 Result(success=True)
+                - 失败时返回 Result(success=False, error="错误信息")
         """
         self.logger.info("检查登录状态")
         status_code, response = self.get("/api/v1/login")
         if status_code == 200:
-            return {"status": "success"}
-        return {"error": "登录状态: NOK"}
+            self.logger.info("登录状态: OK")
+            return Result.success(response)
+        return Result.error("登录状态: NOK")

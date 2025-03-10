@@ -46,27 +46,27 @@ class BD2ClientSim:
                     self.logger.info("开始登录流程")
                     # 让 AuthService 处理凭据获取
                     result = self.auth.login()
-                    if "error" in result:
-                        self.logger.error(f"登录失败: {result['error']}")
+                    if not result.success:
+                        self.logger.error(f"登录失败: {result.error}")
                     else:
                         self.logger.info("登录成功")
-                    return result
+                    return result.to_dict()
                 elif action == "logout":
                     self.logger.info("开始登出流程")
                     result = self.auth.logout()
-                    if result:
-                        self.logger.info("登出成功")
+                    if not result.success:
+                        self.logger.error(f"登出失败: {result.error}")
                     else:
-                        self.logger.error("登出失败")
-                    return result
+                        self.logger.info("登出成功")
+                    return result.to_dict()
                 elif action == "get_login_status":
                     self.logger.info("开始检查登录状态")
                     result = self.auth.get_login_status()
-                    if result["status"] == "success":
-                        self.logger.info("登录状态正常")
-                    else:
+                    if not result.success:
                         self.logger.warning("未登录或登录已过期")
-                    return result
+                    else:
+                        self.logger.info("登录状态正常")
+                    return result.to_dict()
 
             elif task_type == "cert":
                 if action == "deploy":
@@ -113,7 +113,7 @@ class BD2ClientSim:
         
         self.logger.debug(f"解析到任务类型: {task_type}, 操作: {action}")
         result = self.run_task(task_type, action, **args_dict)
-        print(result)
+        self.logger.info(f"任务执行结果: {result}")
 
 if __name__ == "__main__":
     client_sim = BD2ClientSim()
