@@ -65,21 +65,14 @@ class CLIParser:
                 print("  python bd2_client_sim.py auth logout")
                 print("  python bd2_client_sim.py auth get_login_status")
         elif command_type == "cert":
-            if action == "deploy":
-                print("\n证书部署命令示例:")
-                print("  python bd2_client_sim.py cert deploy -e vdf")
-                print("  python bd2_client_sim.py cert deploy -e all --log-level DEBUG")
-            elif action == "revoke":
-                print("\n证书撤销命令示例:")
-                print("  python bd2_client_sim.py cert revoke -i cert123")
-            elif action == "refresh":
-                print("\n证书刷新命令示例:")
-                print("  python bd2_client_sim.py cert refresh -i cert123 -d newdata")
+            if action == "init":
+                print("\n证书初始化命令示例:")
+                print("  python bd2_client_sim.py cert init")
+                print("  python bd2_client_sim.py cert init --log-level DEBUG")
             else:
                 print("\n证书管理命令示例:")
-                print("  python bd2_client_sim.py cert deploy -e vdf")
-                print("  python bd2_client_sim.py cert revoke -i cert123")
-                print("  python bd2_client_sim.py cert refresh -i cert123 -d newdata")
+                print("  python bd2_client_sim.py cert init")
+                print("  python bd2_client_sim.py cert init --log-level DEBUG")
         elif command_type == "diag":
             if action == "run":
                 print("\n诊断运行命令示例:")
@@ -215,52 +208,21 @@ class CLIParser:
         # 证书任务 cert
         cert_parser = subparsers.add_parser("cert", 
             help="证书管理",
-            description="证书管理相关的操作，包括部署、撤销和刷新证书",
+            description="证书管理相关的操作，包括证书功能初始化",
             usage="%(prog)s <action> [<args>] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
         
         cert_subparsers = cert_parser.add_subparsers(dest="action", required=True, help="证书管理操作")
 
-        deploy_parser = cert_subparsers.add_parser("deploy", 
-            help="部署证书",
-            description="部署证书到指定的ECU组件",
-            usage="%(prog)s -e/--ecu {vdf,adf,cdf,zone,ccc,all} [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
+        # 添加证书初始化命令
+        init_parser = cert_subparsers.add_parser("init", 
+            help="初始化证书功能",
+            description="初始化证书功能，超时时间为5秒",
+            usage="%(prog)s [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
-        deploy_parser.add_argument("-e", "--ecu", 
-            choices=["vdf", "adf", "cdf", "zone", "ccc", "all"], 
-            required=True, 
-            help="目标 ECU 组件"
-        )
-        deploy_parser.add_argument(
-            "--log-level",
-            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            help="设置日志级别（优先级高于配置文件）"
-        )
-
-        revoke_parser = cert_subparsers.add_parser("revoke", 
-            help="撤销证书",
-            description="撤销指定ID的证书",
-            usage="%(prog)s -i/--cert_id CERT_ID [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
-            formatter_class=argparse.RawDescriptionHelpFormatter
-        )
-        revoke_parser.add_argument("-i", "--cert_id", required=True, help="证书 ID")
-        revoke_parser.add_argument(
-            "--log-level",
-            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            help="设置日志级别（优先级高于配置文件）"
-        )
-
-        refresh_parser = cert_subparsers.add_parser("refresh", 
-            help="刷新证书",
-            description="使用新的证书数据刷新指定ID的证书",
-            usage="%(prog)s -i/--cert_id CERT_ID -d/--cert_data CERT_DATA [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]",
-            formatter_class=argparse.RawDescriptionHelpFormatter
-        )
-        refresh_parser.add_argument("-i", "--cert_id", required=True, help="证书 ID")
-        refresh_parser.add_argument("-d", "--cert_data", required=True, help="新的证书数据")
-        refresh_parser.add_argument(
+        init_parser.add_argument(
             "--log-level",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
             help="设置日志级别（优先级高于配置文件）"
@@ -293,7 +255,7 @@ class CLIParser:
         parser.epilog = """
 示例:
     bd2_client_sim.py auth login --log-level DEBUG          # 执行登录操作
-    bd2_client_sim.py cert deploy -e vdf                    # 部署证书到VDF
+    bd2_client_sim.py cert init                            # 初始化证书功能
     bd2_client_sim.py diag run -c 0x1234                    # 运行诊断
 """
 
@@ -317,28 +279,14 @@ class CLIParser:
 
         cert_parser.epilog = """
 示例:
-    bd2_client_sim.py cert deploy -e vdf                    # 部署证书到VDF
-    bd2_client_sim.py cert revoke -i cert123                # 撤销指定证书
-    bd2_client_sim.py cert refresh -i cert123 -d data       # 刷新证书数据
+    bd2_client_sim.py cert init                            # 初始化证书功能
+    bd2_client_sim.py cert init --log-level DEBUG          # 使用DEBUG级别初始化证书功能
 """
 
-        deploy_parser.epilog = """
+        init_parser.epilog = """
 示例:
-    bd2_client_sim.py cert deploy -e vdf                    # 部署到VDF
-    bd2_client_sim.py cert deploy -e all                    # 部署到所有组件
-    bd2_client_sim.py cert deploy -e ccc --log-level DEBUG  # 使用DEBUG级别部署到CCC
-"""
-
-        revoke_parser.epilog = """
-示例:
-    bd2_client_sim.py cert revoke -i cert123                # 撤销指定证书
-    bd2_client_sim.py cert revoke -i cert123 --log-level DEBUG  # 使用DEBUG级别撤销证书
-"""
-
-        refresh_parser.epilog = """
-示例:
-    bd2_client_sim.py cert refresh -i cert123 -d newdata    # 刷新证书数据
-    bd2_client_sim.py cert refresh -i cert123 -d newdata --log-level DEBUG  # 使用DEBUG级别刷新证书
+    bd2_client_sim.py cert init                            # 初始化证书功能
+    bd2_client_sim.py cert init --log-level DEBUG          # 使用DEBUG级别初始化证书功能
 """
 
         diag_parser.epilog = """

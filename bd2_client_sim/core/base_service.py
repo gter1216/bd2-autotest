@@ -155,7 +155,7 @@ class BaseService:
             default_headers.update(headers)
         return default_headers
 
-    def _send_request(self, method, endpoint, data=None, headers=None):
+    def _send_request(self, method, endpoint, data=None, headers=None, **kwargs):
         """Generic HTTP request method
         
         Args:
@@ -163,6 +163,7 @@ class BaseService:
             endpoint: API 端点
             data: 请求数据
             headers: 请求头
+            **kwargs: 其他参数，如 timeout
             
         Returns:
             tuple: (status_code, response_data)
@@ -177,7 +178,7 @@ class BaseService:
         
         try:
             response = self.session.request(
-                method, url, json=data, headers=headers
+                method, url, json=data, headers=headers, **kwargs
             )
             
             # 记录响应信息
@@ -202,18 +203,18 @@ class BaseService:
             self.logger.error(f"请求失败: {str(e)}")
             raise
 
-    def post(self, endpoint, data=None, headers=None):
+    def post(self, endpoint, data=None, headers=None, **kwargs):
         """Send POST request"""
-        return self._send_request("POST", endpoint, data, headers)
+        return self._send_request("POST", endpoint, data, headers, **kwargs)
 
-    def get(self, endpoint, headers=None):
+    def get(self, endpoint, headers=None, **kwargs):
         """Send GET request"""
-        return self._send_request("GET", endpoint, None, headers)
+        return self._send_request("GET", endpoint, None, headers, **kwargs)
 
-    def put(self, endpoint, data=None, headers=None):
+    def put(self, endpoint, data=None, headers=None, **kwargs):
         """Send PUT request"""
-        return self._send_request("PUT", endpoint, data, headers)
+        return self._send_request("PUT", endpoint, data, headers, **kwargs)
 
-    def delete(self, endpoint, headers=None):
+    def delete(self, endpoint, headers=None, **kwargs):
         """Send DELETE request"""
-        return self._send_request("DELETE", endpoint, None, headers)
+        return self._send_request("DELETE", endpoint, None, headers, **kwargs)

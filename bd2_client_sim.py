@@ -1,7 +1,7 @@
 from config.config import CONFIG
 from bd2_client_sim.services.auth_service import AuthService
 # from bd2_client_sim.services.diag_service import DiagService
-# from bd2_client_sim.services.cert_service import CertService
+from bd2_client_sim.services.cert_service import CertService
 from utils.cli_parser import CLIParser
 from utils.logger_manager import LoggerManager
 
@@ -27,7 +27,7 @@ class BD2ClientSim:
         self.logger.info(f"使用基础URL: {self.base_url}")
         self.auth = AuthService(self.base_url)
         # self.diagnosis = DiagService(self.base_url)
-        # self.cert = CertService(self.base_url)
+        self.cert = CertService(self.base_url)
 
     def run_task(self, task_type, action, **kwargs):
         """
@@ -77,15 +77,14 @@ class BD2ClientSim:
                     return result.to_dict()
 
             elif task_type == "cert":
-                if action == "deploy":
-                    self.logger.info(f"部署证书到ECU: {kwargs['ecu']}")
-                    return self.cert.deploy_certificate(kwargs["ecu"])
-                elif action == "revoke":
-                    self.logger.info(f"撤销证书: {kwargs['cert_id']}")
-                    return self.cert.revoke_certificate(kwargs["cert_id"])
-                elif action == "refresh":
-                    self.logger.info(f"刷新证书: {kwargs['cert_id']}")
-                    return self.cert.refresh_certificate(kwargs["cert_id"], kwargs["cert_data"])
+                if action == "init":
+                    self.logger.info("开始初始化证书功能")
+                    result = self.cert.init_cert()
+                    if not result.success:
+                        self.logger.warning(f"证书功能初始化失败: {result.error}")
+                    else:
+                        self.logger.info("证书功能初始化成功")
+                    return result.to_dict()
 
             elif task_type == "diag":
                 if action == "run":
