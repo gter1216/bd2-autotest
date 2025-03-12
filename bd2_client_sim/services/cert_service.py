@@ -5,7 +5,6 @@ Changelog:
 - 2025-03-10: Initial creation.
 """
 
-import logging
 from typing import Optional
 import requests
 
@@ -16,13 +15,14 @@ from ..core.base_service import BaseService
 class CertService(BaseService):
     """证书服务类"""
     
-    def __init__(self, logger: Optional[logging.Logger] = None):
+    def __init__(self, base_url):
         """初始化证书服务
         
         Args:
-            logger: 日志记录器
+            base_url: 基础URL
         """
-        super().__init__(logger)
+        super().__init__(base_url)
+        self.logger = self._get_logger()
         
     def init_cert(self) -> Result:
         """初始化证书功能
