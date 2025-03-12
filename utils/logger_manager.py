@@ -6,6 +6,7 @@ Changelog:
 - 2025-03-07: Initial Creation.
 - 2025-03-10: Updated to use script names as log environments.
 - 2025-03-10: Added password masking in log messages.
+- 2025-03-11: Added session directory support for SSE logging.
 """
 
 import logging
@@ -21,6 +22,7 @@ class LoggerManager:
     _logger = None  # Shared logger object
     _log_env = None  # Log environment (script name)
     _log_level = None  # Specified log level
+    _session_dir = None  # Current session directory
 
     # 定义需要记录文件日志的脚本
     FILE_LOG_SCRIPTS = {
@@ -46,6 +48,52 @@ class LoggerManager:
         """
         current_script = os.path.basename(sys.argv[0]).replace('.py', '')
         return current_script if current_script in cls.FILE_LOG_SCRIPTS else None
+
+    @classmethod
+    def get_session_dir(cls):
+        """获取当前会话目录
+        
+        Returns:
+            str: 当前会话目录的路径，如果未创建则返回None
+        """
+        return cls._session_dir
+
+    @classmethod
+    def create_session_dir(cls, script_name=None):
+        """创建新的会话目录
+        
+        Args:
+            script_name: 脚本名称，如果为None则自动获取
+            
+        Returns:
+            str: 会话目录的路径
+        """
+        if script_name is None:
+            script_name = cls.get_current_script_env()
+            
+        # 获取当前时间
+        now = datetime.now()
+        
+        # 构建日志目录路径
+        base_log_dir = CONFIG.get("log.base_log_dir", "logs")
+        script_dir = script_name  # 脚本名称作为一级目录
+        date_dir = now.strftime("%Y-%m-%d")  # 日期作为二级目录
+        session_dir = now.strftime("%H%M%S_%f")[:-3]  # 时间作为三级目录（精确到毫秒）
+        
+        # 完整的日志目录路径
+        log_dir = os.path.join(base_log_dir, script_dir, date_dir, session_dir)
+        
+        # 创建目录
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # 保存会话目录
+        cls._session_dir = log_dir
+        
+        # 打印会话目录的绝对路径
+        abs_path = os.path.abspath(log_dir)
+        print(f"\n日志目录: {abs_path}\n")
+        
+        return log_dir
 
     def __new__(cls, env=None):
         """
@@ -94,14 +142,14 @@ class LoggerManager:
         # 1. 处理 key=value 格式
         for field in cls.PASSWORD_FIELDS:
             message = re.sub(
-                f'{field}=["\']?[^"\'\s]+["\']?',
+                fr'{field}=["\']?[^"\'\s]+["\']?',
                 f'{field}=*******',
                 message,
                 flags=re.IGNORECASE
             )
             # 2. 处理 "key": "value" 格式
             message = re.sub(
-                f'"{field}":\s*["\']?[^"\'\s]+["\']?',
+                fr'"{field}":\s*["\']?[^"\'\s]+["\']?',
                 f'"{field}": "*******"',
                 message,
                 flags=re.IGNORECASE
@@ -122,14 +170,17 @@ class LoggerManager:
         log_level = self.determine_log_level()
         LoggerManager._logger.setLevel(getattr(logging, log_level))
 
-        # 使用基本的日志格式，精确到毫秒，文件名不带后缀
-        log_format = "[%(asctime)s.%(msecs)03d] [%(filename)s] %(levelname)s - %(message)s"
+        # 使用统一的日志格式：[时间] [线程名] [模块名] 日志级别 - 日志信息
+        log_format = "[%(asctime)s.%(msecs)03d][%(threadName)s][%(name)s]%(levelname)s - %(message)s"
         date_format = "%Y-%m-%d %H:%M:%S"
         
         class SecureFormatter(logging.Formatter):
             def format(self, record):
                 # 移除文件名中的.py后缀
                 record.filename = record.filename.replace('.py', '')
+                # 如果是主线程，显示为main
+                if record.threadName == "MainThread":
+                    record.threadName = "main"
                 # 隐藏密码
                 if hasattr(record, 'msg'):
                     record.msg = LoggerManager.mask_passwords(record.msg)
@@ -149,22 +200,12 @@ class LoggerManager:
             self._log_env and 
             self._log_env in self.FILE_LOG_SCRIPTS):
             
-            # 获取当前时间
-            now = datetime.now()
+            # 创建会话目录（如果还没有创建）
+            if not LoggerManager._session_dir:
+                LoggerManager._session_dir = self.create_session_dir(self._log_env)
             
-            # 构建日志目录路径
-            base_log_dir = CONFIG.get("log.base_log_dir", "logs")
-            date_dir = now.strftime("%Y-%m-%d")
-            log_dir = os.path.join(base_log_dir, self._log_env, date_dir)
-            
-            # 创建日志目录
-            os.makedirs(log_dir, exist_ok=True)
-            
-            # 生成日志文件名（精确到毫秒）
-            log_file = os.path.join(
-                log_dir,
-                now.strftime("%Y%m%d_%H%M%S_%f")[:-3] + ".log"  # 去掉最后3位毫秒，保留精确到毫秒
-            )
+            # 生成日志文件名
+            log_file = os.path.join(LoggerManager._session_dir, "script.log")
             
             file_handler = logging.FileHandler(log_file, encoding='utf-8')
             file_handler.setLevel(getattr(logging, log_level))

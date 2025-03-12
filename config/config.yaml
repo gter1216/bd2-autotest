@@ -30,20 +30,48 @@ log:
   log_to_console: true  # Enable log output to console
   log_to_file: true  # Enable log output to file
   base_log_dir: "logs"  # Root directory for log files
-  webclient_log_subdir: "webclient"  # Subdirectory for WebClient logs
-  pytest_log_subdir: "pytest"  # Subdirectory for pytest logs
-  log_file_format: "log_%Y-%m-%d.log"  # Log file name format
-  log_format: "[%(asctime)s] [%(filename)s] %(levelname)s - %(message)s"  # Log message format
-  date_format: "%Y-%m-%d %H:%M:%S.%f"  # Timestamp format (millisecond precision)
+  # webclient_log_subdir: "webclient"  # Subdirectory for WebClient logs
+  # pytest_log_subdir: "pytest"  # Subdirectory for pytest logs
+  # log_file_format: "log_%Y-%m-%d.log"  # Log file name format
+  # log_format: "[%(asctime)s] [%(filename)s] %(levelname)s - %(message)s"  # Log message format
+  # date_format: "%Y-%m-%d %H:%M:%S.%f"  # Timestamp format (millisecond precision)
 
-bd2_client_sim:
-  # BD2 client simulator settings
-  tbd  # To be defined
+# SSE Configuration
+sse:
+  # Task type and action to SSE endpoint mappings
+  task_mappings:
+    auth:
+      login:
+        # - sse_basic_vehicle_service_logs
+        - sse_uds_service_logs
+      logout:
+        # - sse_basic_vehicle_service_logs
+        - sse_uds_service_logs
+      get_login_status:
+        # - sse_basic_vehicle_service_logs
+        - sse_basic_vehicle_service_logs
+      get_vehicle_status:
+        # - sse_basic_vehicle_service_logs
+        - sse_uds_service_logs
+    cert:
+      init:
+        # - sse_basic_vehicle_service_logs
+        - sse_uds_service_logs
+        - sse_cert_ecus
+        - sse_cert_logs
+    diag:
+      run:
+        # - sse_basic_vehicle_service_logs
+        - sse_uds_service_logs
 
-function_test:
-  # Configuration for function testing
-  tbd  # To be defined
+# bd2_client_sim:
+#   # BD2 client simulator settings
+#   tbd  # To be defined
 
-stress_test:
-  # Configuration for stress testing
-  tbd  # To be defined
+# function_test:
+#   # Configuration for function testing
+#   tbd  # To be defined
+
+# stress_test:
+#   # Configuration for stress testing
+#   tbd  # To be defined

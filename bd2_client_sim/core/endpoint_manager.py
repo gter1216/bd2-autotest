@@ -18,13 +18,12 @@ class EndpointManager:
         "cert_init": "/api/v1/app/cert/init",
         "cert_flash": "/api/v1/app/cert/flash",
         "cert_revoke": "/api/v1/app/cert/revoke",
-        "sse_cert_status": "/api/v1/app/cert/ecus",
+        "sse_cert_ecus": "/api/v1/app/cert/ecus",
         "sse_cert_logs": "/api/v1/app/cert/logs",
 
-        # SSE 日志相关
+        # 通用 SSE 日志相关
         "sse_basic_vehicle_service_logs": "/api/v1/log/basic_vehicle_service_logs",
         "sse_uds_service_logs": "/api/v1/log/udserivcelog",
-        "sse_bd2client_logs": "/api/v1/log/bd2clientlog"
     }
 
     @classmethod
