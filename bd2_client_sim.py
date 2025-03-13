@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 import time
 import sys
 import subprocess
+import os
 
 class BD2ClientSim:
     """BD2 客户端模拟器"""
@@ -44,10 +45,12 @@ class BD2ClientSim:
         
         # 创建会话目录并记录命令
         try:
-            # 启动 SSE 日志记录，使用 LoggerManager 的会话目录
-            session_dir = LoggerManager.get_session_dir()
-            if not session_dir:  # 如果会话目录还未创建
-                session_dir = LoggerManager.create_session_dir()
+            # 获取会话目录
+            session_dir = os.environ.get('BD2_SESSION_DIR')
+            if not session_dir:
+                session_dir = LoggerManager.get_session_dir()
+                if not session_dir:  # 如果会话目录还未创建
+                    session_dir = LoggerManager.create_session_dir()
                 
             # 记录执行命令（如果是通过命令行调用）
             if len(sys.argv) > 1:

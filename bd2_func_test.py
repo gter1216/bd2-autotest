@@ -8,9 +8,9 @@ import os
 import sys
 import pytest
 import datetime
+import subprocess
 from typing import Optional, Dict, Any, List
 from utils.cli.bd2_func_test.cli_parser import CLIParser
-from config.config import CONFIG
 from config.config import CONFIG
 from utils.logger_manager import LoggerManager
 
@@ -110,14 +110,46 @@ def main():
         
         # 创建日志目录
         log_dir = LoggerManager.create_session_dir()
+        os.environ['BD2_SESSION_DIR'] = log_dir
         
         # 设置 pytest 日志文件路径
         pytest_log_file = os.path.join(os.path.abspath(log_dir), 'pytest.log')
-        os.environ['PYTEST_LOG_FILE'] = pytest_log_file
-        pytest_args.extend(['--log-file', pytest_log_file])
+        # os.environ['PYTEST_LOG_FILE'] = pytest_log_file
         
-        # 运行测试
-        sys.exit(pytest.main(pytest_args))
+        # # 启用 pytest 的详细输出
+        # if '-v' not in pytest_args and '--verbose' not in pytest_args:
+        #     pytest_args.append('-v')
+        
+        # 启用 pytest 的控制台日志输出
+        # pytest_args.extend(['--log-cli', '--log-cli-level=INFO'])
+        
+        # 使用子进程运行 pytest 并捕获输出
+        cmd = [sys.executable, '-m', 'pytest'] + pytest_args
+        print(f"执行命令: {' '.join(cmd)}")
+
+        # print(pytest_log_file)
+        
+        # 打开日志文件
+        with open(pytest_log_file, 'w', encoding='utf-8') as log_file:
+            # 运行 pytest 并同时输出到控制台和日志文件
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            # 实时读取输出并写入日志文件
+            for line in process.stdout:
+                sys.stdout.write(line)  # 输出到控制台
+                log_file.write(line)    # 写入日志文件
+                log_file.flush()        # 确保立即写入
+            
+            # 等待进程结束
+            return_code = process.wait()
+            sys.exit(return_code)
         
     except Exception as e:
         print(f"错误: {str(e)}")
