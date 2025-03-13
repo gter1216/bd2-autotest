@@ -7,6 +7,7 @@ Changelog:
 
 from typing import Optional
 import requests
+import time
 
 from ..core.endpoint_manager import EndpointManager
 from ..core.result import Result
@@ -57,6 +58,7 @@ class CertService(BaseService):
             
             if status == 1:
                 self.logger.info("证书功能初始化成功")
+                # time.sleep(10)
                 return Result.success(response)
             else:
                 self.logger.error(f"证书功能初始化失败: {message}")

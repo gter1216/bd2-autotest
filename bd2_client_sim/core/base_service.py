@@ -3,6 +3,7 @@ Description: This module provides a base service for handling HTTP API requests.
 
 Changelog:
 - 2025-03-07: Initial Creation.
+- 2025-03-13: Added SSE manager support.
 """
 
 import os
@@ -11,6 +12,7 @@ import requests
 from datetime import datetime
 import pickle
 import logging
+from .sse_manager import SSEManager
 
 
 class BaseService:
@@ -20,6 +22,7 @@ class BaseService:
     _shared_session = None
     _session_file = None
     _logger = None
+    _sse_manager = None  # SSE 管理器实例
 
     @classmethod
     def _get_logger(cls):
@@ -28,6 +31,13 @@ class BaseService:
             from utils.logger_manager import LoggerManager
             cls._logger = LoggerManager.get_logger(__file__)
         return cls._logger
+
+    @classmethod
+    def get_sse_manager(cls):
+        """获取 SSE 管理器实例"""
+        if cls._sse_manager is None and cls._shared_session is not None:
+            cls._sse_manager = SSEManager(cls._shared_session)
+        return cls._sse_manager
 
     def _log_request(self, method, url, headers, data):
         """记录请求信息"""
@@ -89,6 +99,7 @@ class BaseService:
                         # 创建新的 session
                         session = requests.Session()
                         session.verify = False  # 禁用 SSL 验证
+                        session.trust_env = False  # 禁用环境变量中的代理设置
                         requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
                         # 更新 cookie
                         cookies = session_data.get('cookies', {})
@@ -135,9 +146,13 @@ class BaseService:
                 BaseService._shared_session = requests.Session()
                 # 禁用 SSL 验证
                 BaseService._shared_session.verify = False
+                # 禁用环境变量中的代理设置
+                BaseService._shared_session.trust_env = False
                 # 禁用 SSL 验证警告
                 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
         self.session = BaseService._shared_session
+        # 设置 base_url 属性（用于 SSE 管理器）
+        self.session.base_url = base_url
 
     def _get_headers(self, headers=None):
         """Construct request headers"""

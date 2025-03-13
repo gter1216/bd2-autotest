@@ -4,27 +4,58 @@ from bd2_client_sim.services.auth_service import AuthService
 from bd2_client_sim.services.cert_service import CertService
 from utils.cli_parser import CLIParser
 from utils.logger_manager import LoggerManager
-from bd2_client_sim.core.sse_manager import SSEManager
+from bd2_client_sim.core.base_service import BaseService
+from typing import Optional, Dict, Any
 import time
+import sys
+import subprocess
 
 class BD2ClientSim:
     """BD2 客户端模拟器"""
-    _args = None  # 存储解析后的命令行参数
-    _sse_manager = None  # SSE 管理器实例
-
-    def __init__(self):
-        # 确保命令行参数已经解析
-        if BD2ClientSim._args is None:
-            BD2ClientSim._args = CLIParser.parse_args()
-            if BD2ClientSim._args is None:  # 参数解析失败
-                return
-            
-        # 设置日志级别（按优先级：命令行参数 > config file）
-        if BD2ClientSim._args.log_level:
-            LoggerManager.set_log_level(BD2ClientSim._args.log_level)
+    
+    def __init__(self, task_type: Optional[str] = None, 
+                 action: Optional[str] = None, 
+                 uds_log: bool = False,
+                 cs_log: bool = False,
+                 log_level: Optional[str] = None,
+                 **kwargs):
+        """
+        初始化 BD2 客户端模拟器
+        :param task_type: 任务类型 (auth, cert, diag)
+        :param action: 具体操作
+        :param uds_log: 是否启用 UDS 日志
+        :param cs_log: 是否启用 CS 日志
+        :param log_level: 日志级别
+        :param kwargs: 其他参数，如 ecu 等
+        """
+        # 设置参数
+        self.task_type = task_type
+        self.action = action
+        self.uds_log = uds_log
+        self.cs_log = cs_log
+        self.extra_args = kwargs
+        
+        # 设置日志级别
+        if log_level:
+            LoggerManager.set_log_level(log_level)
             
         # 获取logger实例
         self.logger = LoggerManager.get_logger(__file__)
+        
+        # 创建会话目录并记录命令
+        try:
+            # 启动 SSE 日志记录，使用 LoggerManager 的会话目录
+            session_dir = LoggerManager.get_session_dir()
+            if not session_dir:  # 如果会话目录还未创建
+                session_dir = LoggerManager.create_session_dir()
+                
+            # 记录执行命令（如果是通过命令行调用）
+            if len(sys.argv) > 1:
+                cmd = subprocess.list2cmdline(sys.argv)
+                self.logger.info(f"执行命令: {cmd}")
+        except Exception as e:
+            self.logger.warning(f"无法获取执行命令: {e}")
+            
         self.logger.debug("初始化BD2ClientSim")
         self.base_url = CONFIG.get("basic.base_url")
         self.logger.info(f"使用基础URL: {self.base_url}")
@@ -35,10 +66,28 @@ class BD2ClientSim:
         self.cert = CertService(self.base_url)
         
         # 初始化 SSE 管理器
-        if BD2ClientSim._sse_manager is None:
-            BD2ClientSim._sse_manager = SSEManager(self.base_url)
+        self.sse_manager = BaseService.get_sse_manager()
+        if self.sse_manager:
+            self._setup_sse_listeners()
 
-    def run_task(self, task_type, action, **kwargs):
+    def _setup_sse_listeners(self):
+        """根据配置设置 SSE 监听器"""
+        # 获取命令行参数或配置文件中的 SSE 设置
+        sse_configs = {
+            "basic_vehicle_service_log": CONFIG.get("basic.basic_vehicle_service_log", "off"),
+            "uds_log": "on" if self.uds_log else "off",
+            "cs_log": "on" if self.cs_log else "off"
+        }
+        
+        # 启动需要的 SSE 监听器
+        for sse_type, status in sse_configs.items():
+            if status == "on":
+                self.logger.info(f"启动 {sse_type} SSE 监听")
+                self.sse_manager.start_sse(sse_type)
+            else:
+                self.logger.debug(f"{sse_type} SSE 监听未启用")
+
+    def run_task(self, task_type: str, action: str, **kwargs) -> Dict[str, Any]:
         """
         执行 BD2 任务
         :param task_type: 任务类型 (auth, cert, diag)
@@ -53,7 +102,6 @@ class BD2ClientSim:
             if task_type == "auth":
                 if action == "login":
                     self.logger.info("开始登录流程")
-                    # 让 AuthService 处理凭据获取
                     result = self.auth.login()
                     if not result.success:
                         self.logger.error(f"登录失败: {result.error}")
@@ -68,7 +116,7 @@ class BD2ClientSim:
                     else:
                         self.logger.info("登出成功")
                     return result.to_dict()
-                elif action == "get_login_status":
+                elif action == "get_login_st":
                     self.logger.info("开始检查登录状态")
                     result = self.auth.get_login_status()
                     if not result.success:
@@ -76,13 +124,14 @@ class BD2ClientSim:
                     else:
                         self.logger.info("登录状态正常")
                     return result.to_dict()
-                elif action == "get_vehicle_status":
+                elif action == "get_vehicle_st":
                     self.logger.info("开始检查车辆状态")
                     result = self.auth.get_vehicle_status()
                     if not result.success:
                         self.logger.error(f"车辆状态异常: {result.error}")
                     else:
                         self.logger.info("车辆状态正常")
+                        # time.sleep(10)
                     return result.to_dict()
 
             elif task_type == "cert":
@@ -94,11 +143,19 @@ class BD2ClientSim:
                     else:
                         self.logger.info("证书功能初始化成功")
                     return result.to_dict()
+                elif action in ["deploy", "revoke"]:
+                    if "ecu" not in kwargs:
+                        raise KeyError("ecu")
+                    if action == "deploy":
+                        result = self.cert.deploy_cert(kwargs["ecu"])
+                    else:  # revoke
+                        result = self.cert.revoke_cert(kwargs["ecu"])
+                    return result.to_dict()
 
             elif task_type == "diag":
                 if action == "run":
-                    self.logger.info(f"运行诊断: {kwargs['code']}")
-                    return self.diagnosis.run_diagnosis(kwargs["code"])
+                    self.logger.info(f"运行诊断: {kwargs.get('code', '')}")
+                    return self.diagnosis.run_diagnosis(kwargs.get("code"))
 
             self.logger.error(f"未知的任务或操作: {task_type} {action}")
             return {"error": "未知的任务或操作"}
@@ -110,50 +167,59 @@ class BD2ClientSim:
             self.logger.error(f"任务执行失败: {str(e)}")
             return {"error": str(e)}
 
-    def execute(self):
+    def execute(self) -> Dict[str, Any]:
         """
-        从 CLI 解析参数，并执行任务
+        执行任务
+        :return: 任务执行结果
         """
-        if BD2ClientSim._args is None:
-            BD2ClientSim._args = CLIParser.parse_args()
-            if BD2ClientSim._args is None:  # 参数解析失败
-                return
-        
-        self.logger.debug("开始解析命令行参数")
-        
-        args_dict = vars(BD2ClientSim._args)
-        task_type = args_dict.pop('task_type')
-        action = args_dict.pop('action')
-        # 移除日志相关参数，因为它们不是任务参数
-        args_dict.pop('log_level', None)
-        
+        if not self.task_type or not self.action:
+            self.logger.error("缺少必要的任务类型或动作参数")
+            return {"error": "缺少必要的任务类型或动作参数"}
+            
         try:
-            # 启动 SSE 日志记录，使用 LoggerManager 的会话目录
-            session_dir = LoggerManager.get_session_dir()
-            if not session_dir:  # 如果会话目录还未创建
-                session_dir = LoggerManager.create_session_dir()
-            
-            # 启动SSE监听并等待连接就绪
-            if not BD2ClientSim._sse_manager.start_sse_logging(task_type, action, session_dir):
-                self.logger.error("一个或多个SSE连接启动失败")
-            
-            # 等待所有SSE连接就绪
-            if not BD2ClientSim._sse_manager.wait_for_ready(timeout=10):
-                self.logger.warning("等待SSE连接就绪超时，继续执行任务")
-            
             # 执行任务
-            self.logger.debug(f"解析到任务类型: {task_type}, 操作: {action}")
-            result = self.run_task(task_type, action, **args_dict)
+            self.logger.debug(f"解析到任务类型: {self.task_type}, 操作: {self.action}")
+            result = self.run_task(self.task_type, self.action, **self.extra_args)
             self.logger.info(f"任务执行结果: {result}")
             
             # 任务完成后等待一小段时间，确保SSE日志能够完整记录
             time.sleep(0.5)
             
+            return result
+            
         finally:
-            # 停止所有 SSE 处理器
-            if BD2ClientSim._sse_manager:
-                BD2ClientSim._sse_manager.stop_all()
+            pass
+
+    def cleanup(self):
+        """清理资源"""
+        if self.sse_manager:
+            self.sse_manager.stop_all()
+
+    @classmethod
+    def from_cli_args(cls) -> 'BD2ClientSim':
+        """
+        从命令行参数创建实例
+        :return: BD2ClientSim实例
+        """
+        result = CLIParser.parse_args()
+        if result is None:
+            sys.exit(1)
+            
+        task_type, action, args = result
+        return cls(
+            task_type=task_type,
+            action=action,
+            uds_log=args.get('uds_log', False),
+            cs_log=args.get('cs_log', False),
+            log_level=args.get('log_level'),
+            **{k: v for k, v in args.items() if k not in ['uds_log', 'cs_log', 'log_level']}
+        )
 
 if __name__ == "__main__":
-    client_sim = BD2ClientSim()
-    client_sim.execute()
+    client_sim = BD2ClientSim.from_cli_args()
+    try:
+        result = client_sim.execute()
+        if result.get('error'):
+            sys.exit(1)
+    finally:
+        client_sim.cleanup()

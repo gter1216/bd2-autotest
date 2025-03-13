@@ -9,6 +9,12 @@ basic:
   # sso_username: "charles.xu2"  # SSO Username for BD2 server
   # sso_password: "*******"  # SSO Password for BD2 server
 
+  # 通用日志配置
+  basic_vehicle_service_log: off
+  uds_log: off
+  appl_log: off
+
+# python 脚本日志配置
 log:
   # Available log levels (from most to least verbose):
   # - DEBUG: Detailed information for debugging (includes all levels below)
@@ -36,42 +42,15 @@ log:
   # log_format: "[%(asctime)s] [%(filename)s] %(levelname)s - %(message)s"  # Log message format
   # date_format: "%Y-%m-%d %H:%M:%S.%f"  # Timestamp format (millisecond precision)
 
-# SSE Configuration
-sse:
-  # Task type and action to SSE endpoint mappings
-  task_mappings:
-    auth:
-      login:
-        # - sse_basic_vehicle_service_logs
-        - sse_uds_service_logs
-      logout:
-        # - sse_basic_vehicle_service_logs
-        - sse_uds_service_logs
-      get_login_status:
-        # - sse_basic_vehicle_service_logs
-        - sse_basic_vehicle_service_logs
-      get_vehicle_status:
-        # - sse_basic_vehicle_service_logs
-        - sse_uds_service_logs
-    cert:
-      init:
-        # - sse_basic_vehicle_service_logs
-        - sse_uds_service_logs
-        - sse_cert_ecus
-        - sse_cert_logs
-    diag:
-      run:
-        # - sse_basic_vehicle_service_logs
-        - sse_uds_service_logs
 
-# bd2_client_sim:
-#   # BD2 client simulator settings
-#   tbd  # To be defined
+bd2_client_sim:
+  # BD2 client simulator settings
+  tbd  # To be defined
 
-# function_test:
-#   # Configuration for function testing
-#   tbd  # To be defined
+function_test:
+  # Configuration for function testing
+  tbd  # To be defined
 
-# stress_test:
-#   # Configuration for stress testing
-#   tbd  # To be defined
+stress_test:
+  # Configuration for stress testing
+  tbd  # To be defined
