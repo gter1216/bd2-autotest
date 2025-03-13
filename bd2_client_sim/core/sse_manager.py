@@ -7,6 +7,7 @@ Changelog:
 
 import json
 import threading
+import os
 from sseclient import SSEClient
 from utils.logger_manager import LoggerManager
 from .endpoint_manager import EndpointManager
@@ -24,6 +25,21 @@ class SSEManager:
         self.logger = LoggerManager.get_logger(__file__)
         self.sse_threads = {}  # 存储 SSE 线程
         self._stop_events = {}  # 存储停止事件
+
+    def _write_to_uds_log(self, msg):
+        """将消息写入 uds.log 文件
+        
+        Args:
+            msg: 要写入的消息
+        """
+        try:
+            session_dir = LoggerManager.get_session_dir()
+            if session_dir:
+                log_file = os.path.join(session_dir, 'uds.log')
+                with open(log_file, 'a', encoding='utf-8') as f:
+                    f.write(f"{msg}\n")
+        except Exception as e:
+            self.logger.error(f"写入 uds.log 失败: {str(e)}")
 
     def _sse_worker(self, sse_type, url, stop_event):
         """SSE 工作线程
@@ -58,12 +74,16 @@ class SSEManager:
                     data = json.loads(event.data)
                     log_msg.append("\nParsed JSON Data:")
                     log_msg.append(json.dumps(data, indent=2, ensure_ascii=False))
+                    
+                    # 如果是 uds_log 类型且解析成功，将 msg 字段写入 uds.log
+                    if sse_type == 'uds_log' and 'msg' in data:
+                        self._write_to_uds_log(data['msg'])
                 except json.JSONDecodeError:
                     log_msg.append("\nRaw Data:")
                     log_msg.append(event.data)
                     
                 log_msg.append("="*50)
-                thread_logger.info("\n".join(log_msg))
+                thread_logger.debug("\n".join(log_msg))
                 
         except Exception as e:
             thread_logger.error(f"{sse_type} SSE 连接异常: {str(e)}")

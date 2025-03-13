@@ -131,7 +131,7 @@ class BD2ClientSim:
                         self.logger.error(f"车辆状态异常: {result.error}")
                     else:
                         self.logger.info("车辆状态正常")
-                        # time.sleep(10)
+                        time.sleep(10)
                     return result.to_dict()
 
             elif task_type == "cert":
