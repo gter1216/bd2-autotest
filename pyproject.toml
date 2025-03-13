@@ -1,0 +1,21 @@
+[tool.pytest.ini_options]
+# 日志配置
+# log_cli = true
+# log_cli_level = "INFO"
+# log_cli_format = "%(asctime)s [%(levelname)s] %(message)s"
+# log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+# log_file = "logs/pytest.log"
+# log_file_level = "INFO"
+
+# 测试配置
+testpaths = ["bd2_func_test"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+# 标记配置
+markers = [
+    "auth: 认证相关测试",
+    "cert: 证书相关测试",
+    "diag: 诊断相关测试"
+] 

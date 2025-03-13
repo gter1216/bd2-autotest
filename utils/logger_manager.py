@@ -43,9 +43,16 @@ class LoggerManager:
     def get_current_script_env(cls):
         """
         获取当前运行脚本的日志环境
+        - 如果设置了 BD2_SCRIPT_NAME 环境变量，使用该值
         - 如果脚本在 FILE_LOG_SCRIPTS 中，返回脚本名
         - 否则返回 None，表示不记录文件日志
         """
+        # 优先使用环境变量
+        script_name = os.environ.get('BD2_SCRIPT_NAME')
+        if script_name:
+            return script_name
+            
+        # 如果没有环境变量，使用脚本名
         current_script = os.path.basename(sys.argv[0]).replace('.py', '')
         return current_script if current_script in cls.FILE_LOG_SCRIPTS else None
 
