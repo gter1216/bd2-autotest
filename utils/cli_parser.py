@@ -22,7 +22,7 @@ class CertAction(str, Enum):
 class DiagAction(str, Enum):
     RUN = "run"
 
-class EcuType(str, Enum):
+class GetEcuType(str, Enum):
     ADF = "adf"
     CDF = "cdf"
     SAF = "saf"
@@ -33,6 +33,17 @@ class EcuType(str, Enum):
     ZONE_REM = "zone_rem"
     ZONE_REE = "zone_ree"
     ALL = "all"
+
+class DeployEcuType(str, Enum):
+    CCC = "ccc"
+    ZONE_FRONT = "zone_front"
+    ZONE_REAR = "zone_rear"
+    ALL = "all"
+
+class RevokeEcuType(str, Enum):
+    CCC = "ccc"
+    ZONE_FRONT = "zone_front"
+    ZONE_REAR = "zone_rear"
 
 class CLIParser:
     """BD2 Client Simulator CLI Parser"""
@@ -117,16 +128,16 @@ class CLIParser:
                     value = sys.argv[i + 1]
                     if task_type == TaskType.CERT.value:
                         if action == CertAction.DEPLOY.value:
-                            if value not in [e.value for e in EcuType]:
-                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType)}")
+                            if value not in [e.value for e in DeployEcuType]:
+                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in DeployEcuType)}")
                                 sys.exit(1)  # 错误退出
                         elif action == CertAction.REVOKE.value:
-                            if value not in [e.value for e in EcuType if e != EcuType.ALL]:
-                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
+                            if value not in [e.value for e in RevokeEcuType if e != RevokeEcuType.ALL]:
+                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType if e != RevokeEcuType.ALL)}")
                                 sys.exit(1)  # 错误退出
                         elif action == CertAction.GET_CERT_ST.value:
-                            if value not in [e.value for e in EcuType if e != EcuType.ALL]:
-                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
+                            if value not in [e.value for e in GetEcuType if e != GetEcuType.ALL]:
+                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in GetEcuType if e != GetEcuType.ALL)}")
                                 sys.exit(1)  # 错误退出
                     args['ecu'] = value
                     i += 2
@@ -144,12 +155,12 @@ class CLIParser:
                         click.echo(f"错误: {action} 操作需要 -ecu 参数")
                         sys.exit(1)  # 错误退出
                     if action == CertAction.DEPLOY.value:
-                        if args['ecu'] not in [e.value for e in EcuType]:
-                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType)}")
+                        if args['ecu'] not in [e.value for e in DeployEcuType]:
+                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in DeployEcuType)}")
                             sys.exit(1)  # 错误退出
                     elif action == CertAction.REVOKE.value:
-                        if args['ecu'] not in [e.value for e in EcuType if e != EcuType.ALL]:
-                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
+                        if args['ecu'] not in [e.value for e in RevokeEcuType if e != RevokeEcuType.ALL]:
+                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType if e != RevokeEcuType.ALL)}")
                             sys.exit(1)  # 错误退出
 
             return task_type, action, args
@@ -268,7 +279,7 @@ BD2 Client Simulator CLI
 部署证书到指定 ECU
 
 必选参数:
-  -ecu <type>    ECU 类型 (adf, cdf, saf, vdf_mcore, vdf, zone_ftm, zone_fte, zone_rem, zone_ree, all)
+  -ecu <type>    ECU 类型 (ccc, zone_front, zone_rear, all)
 
 示例:
     bd2_client_sim.py cert deploy -ecu ccc               # 部署到 CCC
@@ -280,7 +291,7 @@ BD2 Client Simulator CLI
 撤销指定 ECU 的证书
 
 必选参数:
-  -ecu <type>    ECU 类型 (adf, cdf, saf, vdf_mcore, vdf, zone_ftm, zone_fte, zone_rem, zone_ree)
+  -ecu <type>    ECU 类型 (ccc, zone_front, zone_rear)
 
 示例:
     bd2_client_sim.py cert revoke -ecu vdf_mcore        # 撤销 VDF_MCORE 证书
