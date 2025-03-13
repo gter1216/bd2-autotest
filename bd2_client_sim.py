@@ -2,7 +2,7 @@ from config.config import CONFIG
 from bd2_client_sim.services.auth_service import AuthService
 # from bd2_client_sim.services.diag_service import DiagService
 from bd2_client_sim.services.cert_service import CertService
-from utils.cli_parser import CLIParser
+from utils.cli.bd2_client_sim.cli_parser import CLIParser
 from utils.logger_manager import LoggerManager
 from bd2_client_sim.core.base_service import BaseService
 from typing import Optional, Dict, Any
