@@ -23,9 +23,15 @@ class DiagAction(str, Enum):
     RUN = "run"
 
 class EcuType(str, Enum):
-    CCC = "ccc"
-    ZONE_FRONT = "zone_front"
-    ZONE_REAR = "zone_rear"
+    ADF = "adf"
+    CDF = "cdf"
+    SAF = "saf"
+    VDF_MCORE = "vdf_mcore"
+    VDF = "vdf"
+    ZONE_FTM = "zone_ftm"
+    ZONE_FTE = "zone_fte"
+    ZONE_REM = "zone_rem"
+    ZONE_REE = "zone_ree"
     ALL = "all"
 
 class CLIParser:
@@ -118,6 +124,10 @@ class CLIParser:
                             if value not in [e.value for e in EcuType if e != EcuType.ALL]:
                                 click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
                                 sys.exit(1)  # 错误退出
+                        elif action == CertAction.GET_CERT_ST.value:
+                            if value not in [e.value for e in EcuType if e != EcuType.ALL]:
+                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
+                                sys.exit(1)  # 错误退出
                     args['ecu'] = value
                     i += 2
                 elif arg in ['-h', '--help']:
@@ -133,6 +143,14 @@ class CLIParser:
                     if 'ecu' not in args:
                         click.echo(f"错误: {action} 操作需要 -ecu 参数")
                         sys.exit(1)  # 错误退出
+                    if action == CertAction.DEPLOY.value:
+                        if args['ecu'] not in [e.value for e in EcuType]:
+                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType)}")
+                            sys.exit(1)  # 错误退出
+                    elif action == CertAction.REVOKE.value:
+                        if args['ecu'] not in [e.value for e in EcuType if e != EcuType.ALL]:
+                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in EcuType if e != EcuType.ALL)}")
+                            sys.exit(1)  # 错误退出
 
             return task_type, action, args
 
@@ -191,9 +209,9 @@ BD2 Client Simulator CLI
 
 示例:
     bd2_client_sim.py cert init                           # 初始化证书功能
-    bd2_client_sim.py cert deploy -ecu ccc --cs-log on    # 部署证书到CCC并启用CS日志
-    bd2_client_sim.py cert revoke -ecu zone_front         # 撤销前区证书
-    bd2_client_sim.py cert get_cert_st                    # 获取证书状态
+    bd2_client_sim.py cert deploy -ecu vdf_mcore --cs-log on    # 部署证书到VDF_MCORE并启用CS日志
+    bd2_client_sim.py cert revoke -ecu zone_fte         # 撤销ZONE_FTE证书
+    bd2_client_sim.py cert get_cert_st -ecu saf         # 获取SAF的证书状态
 """,
             TaskType.DIAG.value: """
 用法: bd2_client_sim.py diag <action> [<args>] [--uds-log] [--cs-log] [--log-level]
@@ -250,7 +268,7 @@ BD2 Client Simulator CLI
 部署证书到指定 ECU
 
 必选参数:
-  -ecu <type>    ECU 类型 (ccc, zone_front, zone_rear, all)
+  -ecu <type>    ECU 类型 (adf, cdf, saf, vdf_mcore, vdf, zone_ftm, zone_fte, zone_rem, zone_ree, all)
 
 示例:
     bd2_client_sim.py cert deploy -ecu ccc               # 部署到 CCC
@@ -262,11 +280,25 @@ BD2 Client Simulator CLI
 撤销指定 ECU 的证书
 
 必选参数:
-  -ecu <type>    ECU 类型 (ccc, zone_front, zone_rear)
+  -ecu <type>    ECU 类型 (adf, cdf, saf, vdf_mcore, vdf, zone_ftm, zone_fte, zone_rem, zone_ree)
 
 示例:
-    bd2_client_sim.py cert revoke -ecu ccc              # 撤销 CCC 证书
-    bd2_client_sim.py cert revoke -ecu zone_front       # 撤销前区证书
+    bd2_client_sim.py cert revoke -ecu vdf_mcore        # 撤销 VDF_MCORE 证书
+    bd2_client_sim.py cert revoke -ecu zone_fte         # 撤销 ZONE_FTE 证书
+""",
+            (TaskType.CERT.value, CertAction.GET_CERT_ST.value): """
+用法: bd2_client_sim.py cert get_cert_st [-ecu <type>] [--uds-log] [--cs-log] [--log-level]
+
+获取证书状态信息
+
+可选参数:
+  -ecu <type>    ECU 类型 (adf, cdf, saf, vdf_mcore, vdf, zone_ftm, zone_fte, zone_rem, zone_ree)
+                 如果不指定，将显示所有 ECU 的状态
+
+示例:
+    bd2_client_sim.py cert get_cert_st                  # 获取所有 ECU 的证书状态
+    bd2_client_sim.py cert get_cert_st -ecu saf         # 获取 SAF 的证书状态
+    bd2_client_sim.py cert get_cert_st -ecu vdf_mcore   # 获取 VDF_MCORE 的证书状态
 """,
             (TaskType.DIAG.value, DiagAction.RUN.value): """
 用法: bd2_client_sim.py diag run [<args>] [--uds-log] [--cs-log] [--log-level]

@@ -101,8 +101,11 @@ class CertService(BaseService):
                 f"证书功能初始化异常: {str(e)}"
             )
             
-    def get_cert_st(self) -> Result:
+    def get_cert_st(self, ecu: Optional[str] = None) -> Result:
         """获取证书状态
+        
+        Args:
+            ecu: 可选的 ECU 名称，如果提供则只返回该 ECU 的状态
         
         Returns:
             Result: 包含证书状态的 Result 对象，格式为：
@@ -146,34 +149,39 @@ class CertService(BaseService):
                 self.logger.error("获取证书状态失败：响应为空")
                 return Result.error({"error": "获取证书状态失败：响应为空"})
             
-            self.logger.info(f"获取证书状态成功: {status_code}")
-
-            self.logger.info(f"证书状态为:")
-
             # 提取需要的信息
             result = ecus_response.get('result', {})
             ecus = ecus_response.get('ecus', [])
             
+            # 如果指定了 ECU，过滤结果
+            if ecu:
+                ecus = [e for e in ecus if e.get('ecu', '').lower() == ecu.lower()]
+                if not ecus:
+                    return Result.error(
+                        {"error": f"未找到 ECU: {ecu}"},
+                        f"未找到 ECU: {ecu}"
+                    )
+            
             # 记录 ECU 信息
-            for ecu in ecus:
-                ecu_info = [
-                    f"\nECU: {ecu.get('ecu')}",
-                    f"Group: {ecu.get('group')}",
-                    f"Online: {ecu.get('online')}",
-                    f"RD Status: {ecu.get('rd_status')}",
+            for ecu_info in ecus:
+                ecu_log = [
+                    f"\nECU: {ecu_info.get('ecu')}",
+                    f"Group: {ecu_info.get('group')}",
+                    f"Online: {ecu_info.get('online')}",
+                    f"RD Status: {ecu_info.get('rd_status')}",
                     "Certificates:"
                 ]
                 
-                for cert in ecu.get('certs', []):
-                    cert_info = [
+                for cert in ecu_info.get('certs', []):
+                    cert_log = [
                         f"  - Type: {cert.get('type')}",
                         f"    Name: {cert.get('name')}",
                         f"    State: {cert.get('state')}",
                         f"    Start Time: {cert.get('start_time')}"
                     ]
-                    ecu_info.extend(cert_info)
+                    ecu_log.extend(cert_log)
                 
-                self.logger.info("\n".join(ecu_info))
+                self.logger.info("\n".join(ecu_log))
             
             # 构造返回结果
             return Result.success({
@@ -182,17 +190,17 @@ class CertService(BaseService):
                 "current_group": result.get('current_group'),
                 "current_operation": result.get('current_operation'),
                 "ecus": [{
-                    "ecu": ecu.get('ecu'),
-                    "group": ecu.get('group'),
-                    "online": ecu.get('online'),
-                    "rd_status": ecu.get('rd_status'),
+                    "ecu": ecu_info.get('ecu'),
+                    "group": ecu_info.get('group'),
+                    "online": ecu_info.get('online'),
+                    "rd_status": ecu_info.get('rd_status'),
                     "certs": [{
                         "type": cert.get('type'),
                         "name": cert.get('name'),
                         "state": cert.get('state'),
                         "start_time": cert.get('start_time')
-                    } for cert in ecu.get('certs', [])]
-                } for ecu in ecus]
+                    } for cert in ecu_info.get('certs', [])]
+                } for ecu_info in ecus]
             })
             
         except Exception as e:

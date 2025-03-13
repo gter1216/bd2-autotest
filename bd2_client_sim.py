@@ -145,7 +145,7 @@ class BD2ClientSim:
                     return result.to_dict()
                 elif action == "get_cert_st":
                     self.logger.info("开始获取证书状态")
-                    result = self.cert.get_cert_st()
+                    result = self.cert.get_cert_st(kwargs.get('ecu'))
                     if not result.success:
                         self.logger.warning(f"获取证书状态失败: {result.error}")
                     else:
