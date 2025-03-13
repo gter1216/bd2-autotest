@@ -21,8 +21,8 @@
                 // "auth", "get_vehicle_status", "--log-level", "DEBUG"
                 
                 // cert related
-                "cert", "init", "--log-level", "DEBUG"
-            ],
+                "cert", "init", "--cs-log", "on", "--log-level", "DEBUG"
+            ]
             // "cwd": "${fileDirname}",  // 设置工作目录为当前文件(F5运行main.py 时就是main.py的目录)的目录
             //                           // 跟 from ... import ... 没有关系，跟 open 文件有关系 
             //                           // 只对 F5 debug 模式生效，不对 run 模式生效

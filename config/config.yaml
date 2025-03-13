@@ -13,6 +13,7 @@ basic:
   basic_vehicle_service_log: off
   uds_log: off
   appl_log: off
+  cs_log: off
 
 # python 脚本日志配置
 log:

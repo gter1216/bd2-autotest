@@ -63,7 +63,7 @@ class BD2ClientSim:
         # 初始化服务
         self.auth = AuthService(self.base_url)
         # self.diagnosis = DiagService(self.base_url)
-        self.cert = CertService(self.base_url)
+        self.cert = CertService(self.base_url, cs_log=self.cs_log)
         
         # 初始化 SSE 管理器
         self.sse_manager = BaseService.get_sse_manager()
@@ -142,6 +142,14 @@ class BD2ClientSim:
                         self.logger.warning(f"证书功能初始化失败: {result.error}")
                     else:
                         self.logger.info("证书功能初始化成功")
+                    return result.to_dict()
+                elif action == "get_cert_st":
+                    self.logger.info("开始获取证书状态")
+                    result = self.cert.get_cert_st()
+                    if not result.success:
+                        self.logger.warning(f"获取证书状态失败: {result.error}")
+                    else:
+                        self.logger.info("获取证书状态成功")
                     return result.to_dict()
                 elif action in ["deploy", "revoke"]:
                     if "ecu" not in kwargs:

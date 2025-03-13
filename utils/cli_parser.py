@@ -17,6 +17,7 @@ class CertAction(str, Enum):
     INIT = "init"
     DEPLOY = "deploy"
     REVOKE = "revoke"
+    GET_CERT_ST = "get_cert_st"
 
 class DiagAction(str, Enum):
     RUN = "run"
@@ -186,11 +187,13 @@ BD2 Client Simulator CLI
   init           初始化证书功能
   deploy         部署证书（需要 -ecu 参数）
   revoke         撤销证书（需要 -ecu 参数）
+  get_cert_st    获取证书状态
 
 示例:
     bd2_client_sim.py cert init                           # 初始化证书功能
     bd2_client_sim.py cert deploy -ecu ccc --cs-log on    # 部署证书到CCC并启用CS日志
     bd2_client_sim.py cert revoke -ecu zone_front         # 撤销前区证书
+    bd2_client_sim.py cert get_cert_st                    # 获取证书状态
 """,
             TaskType.DIAG.value: """
 用法: bd2_client_sim.py diag <action> [<args>] [--uds-log] [--cs-log] [--log-level]
