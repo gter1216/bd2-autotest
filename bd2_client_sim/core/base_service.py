@@ -170,7 +170,7 @@ class BaseService:
             default_headers.update(headers)
         return default_headers
 
-    def _send_request(self, method, endpoint, data=None, headers=None, **kwargs):
+    def _send_request(self, method, endpoint, data=None, headers=None, no_log=False, **kwargs):
         """Generic HTTP request method
         
         Args:
@@ -178,6 +178,7 @@ class BaseService:
             endpoint: API 端点
             data: 请求数据
             headers: 请求头
+            no_log: 是否禁用请求和响应的日志记录
             **kwargs: 其他参数，如 timeout
             
         Returns:
@@ -189,7 +190,8 @@ class BaseService:
         headers = self._get_headers(headers)
         
         # 记录请求信息
-        self._log_request(method, url, headers, data)
+        if not no_log:
+            self._log_request(method, url, headers, data)
         
         try:
             response = self.session.request(
@@ -197,7 +199,8 @@ class BaseService:
             )
             
             # 记录响应信息
-            self._log_response(response)
+            if not no_log:
+                self._log_response(response)
             
             # 处理Set-Cookie头
             if 'Set-Cookie' in response.headers:
@@ -222,9 +225,9 @@ class BaseService:
         """Send POST request"""
         return self._send_request("POST", endpoint, data, headers, **kwargs)
 
-    def get(self, endpoint, headers=None, **kwargs):
+    def get(self, endpoint, headers=None, no_log=False, **kwargs):
         """Send GET request"""
-        return self._send_request("GET", endpoint, None, headers, **kwargs)
+        return self._send_request("GET", endpoint, None, headers, no_log, **kwargs)
 
     def put(self, endpoint, data=None, headers=None, **kwargs):
         """Send PUT request"""

@@ -132,8 +132,8 @@ class CLIParser:
                                 click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in DeployEcuType)}")
                                 sys.exit(1)  # 错误退出
                         elif action == CertAction.REVOKE.value:
-                            if value not in [e.value for e in RevokeEcuType if e != RevokeEcuType.ALL]:
-                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType if e != RevokeEcuType.ALL)}")
+                            if value not in [e.value for e in RevokeEcuType]:
+                                click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType)}")
                                 sys.exit(1)  # 错误退出
                         elif action == CertAction.GET_CERT_ST.value:
                             if value not in [e.value for e in GetEcuType if e != GetEcuType.ALL]:
@@ -159,8 +159,8 @@ class CLIParser:
                             click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in DeployEcuType)}")
                             sys.exit(1)  # 错误退出
                     elif action == CertAction.REVOKE.value:
-                        if args['ecu'] not in [e.value for e in RevokeEcuType if e != RevokeEcuType.ALL]:
-                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType if e != RevokeEcuType.ALL)}")
+                        if args['ecu'] not in [e.value for e in RevokeEcuType]:
+                            click.echo(f"错误: -ecu 的值必须是 {', '.join(e.value for e in RevokeEcuType)}")
                             sys.exit(1)  # 错误退出
 
             return task_type, action, args

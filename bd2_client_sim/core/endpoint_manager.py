@@ -24,6 +24,7 @@ class EndpointManager:
         # 通用 SSE 日志相关
         "basic_vehicle_service_log": "/api/v1/log/basic_vehicle_service_log",
         "uds_log": "/api/v1/log/udservice",
+        # "event_log": "/api/v1/event",
         "appl_log": "/api/v1/log/appllog",
     }
 

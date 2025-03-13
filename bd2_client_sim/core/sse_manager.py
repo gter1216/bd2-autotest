@@ -83,7 +83,7 @@ class SSEManager:
                     log_msg.append(event.data)
                     
                 log_msg.append("="*50)
-                thread_logger.debug("\n".join(log_msg))
+                # thread_logger.debug("\n".join(log_msg))
                 
         except Exception as e:
             thread_logger.error(f"{sse_type} SSE 连接异常: {str(e)}")

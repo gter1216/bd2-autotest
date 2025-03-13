@@ -75,8 +75,7 @@ class BD2ClientSim:
         # 获取命令行参数或配置文件中的 SSE 设置
         sse_configs = {
             "basic_vehicle_service_log": CONFIG.get("basic.basic_vehicle_service_log", "off"),
-            "uds_log": "on" if self.uds_log else "off",
-            "cs_log": "on" if self.cs_log else "off"
+            "uds_log": "on" if self.uds_log else "off"
         }
         
         # 启动需要的 SSE 监听器
