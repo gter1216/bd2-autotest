@@ -146,6 +146,10 @@ class CertService(BaseService):
                 self.logger.error("获取证书状态失败：响应为空")
                 return Result.error({"error": "获取证书状态失败：响应为空"})
             
+            self.logger.info(f"获取证书状态成功: {status_code}")
+
+            self.logger.info(f"证书状态为:")
+
             # 提取需要的信息
             result = ecus_response.get('result', {})
             ecus = ecus_response.get('ecus', [])
