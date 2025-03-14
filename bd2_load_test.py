@@ -14,6 +14,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from utils.logger_manager import LoggerManager
 from utils.cli.bd2_load_test.cli_parser import CLIParser
+import subprocess
 
 # 使用importlib导入BD2ClientSim
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,8 +27,11 @@ BD2ClientSim = module.BD2ClientSim
 class LoadTest:
     """负载测试类"""
     
-    def __init__(self, test_cases_file: str, duration: Optional[int] = None,
-                 uds_log: bool = False, ccs_log: bool = False, 
+    def __init__(self, 
+                 test_cases_file: str, 
+                 duration: Optional[int] = None,
+                 uds_log: bool = False, 
+                 ccs_log: bool = False, 
                  log_level: str = None):
         """
         初始化负载测试
@@ -37,30 +41,24 @@ class LoadTest:
         :param ccs_log: 是否启用 CCS 日志
         :param log_level: 日志级别
         """
-        # 设置日志
-        if uds_log:
-            os.environ['BD2_UDS_LOG'] = 'true'
-        if ccs_log:
-            os.environ['BD2_CCS_LOG'] = 'true'
+        # 设置日志级别
         if log_level:
-            os.environ['BD2_LOG_LEVEL'] = log_level
+            LoggerManager.set_log_level(log_level)
+            
+        # 获取logger实例
+        self.logger = LoggerManager.get_logger(__file__)
         
-        # 设置脚本名称
-        os.environ['BD2_SCRIPT_NAME'] = 'bd2_load_test'
-        
-        # 创建日志目录
-        self.log_dir = LoggerManager.create_session_dir()
-        os.environ['BD2_SESSION_DIR'] = self.log_dir
-        
-        # 初始化日志
-        self.logger = logging.getLogger('bd2_load_test')
-        self._setup_logging()
-        
+        # 记录执行命令（如果是通过命令行调用）
+        if len(sys.argv) > 1:
+            cmd = subprocess.list2cmdline(sys.argv)
+            self.logger.info(f"执行命令: {cmd}")
+
         # 保存参数
         self.test_cases_file = test_cases_file
         self.duration = duration
         self.start_time = None
         self.end_time = None
+        self.log_dir = LoggerManager.get_session_dir()
         
         # 初始化客户端
         self.client = BD2ClientSim(uds_log=uds_log, ccs_log=ccs_log, log_level=log_level)
@@ -76,26 +74,6 @@ class LoadTest:
             'end_time': None,
             'total_duration': 0
         }
-    
-    def _setup_logging(self):
-        """设置日志"""
-        # 创建文件处理器
-        log_file = os.path.join(self.log_dir, 'load_test.log')
-        file_handler = logging.FileHandler(log_file, encoding='utf-8')
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)'
-        ))
-        
-        # 创建控制台处理器
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(logging.Formatter(
-            '%(asctime)s [%(levelname)8s] %(message)s'
-        ))
-        
-        # 添加处理器
-        self.logger.addHandler(file_handler)
-        self.logger.addHandler(console_handler)
-        self.logger.setLevel(logging.INFO)
     
     def _load_test_cases(self) -> List[Dict[str, Any]]:
         """
@@ -203,65 +181,147 @@ class LoadTest:
             if stats['total'] > 0:
                 success_rate = (stats['success'] / stats['total']) * 100
                 print(f"  成功率: {success_rate:.2f}%")
-    
+
     def _generate_report(self):
-        """生成测试报告"""
+        """Generate load test report"""
+        # Ensure the log directory exists
+        os.makedirs(self.log_dir, exist_ok=True)
+        
         report_file = os.path.join(self.log_dir, 'load_test_report.html')
-        
-        with open(report_file, 'w', encoding='utf-8') as f:
-            f.write("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>BD2 负载测试报告</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    table { border-collapse: collapse; width: 100%; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    .success { color: green; }
-                    .failed { color: red; }
-                </style>
-            </head>
-            <body>
-                <h1>BD2 负载测试报告</h1>
-                <p>测试开始时间: {start_time}</p>
-                <p>测试结束时间: {end_time}</p>
-                <p>总测试时长: {duration:.2f} 秒</p>
-                <h2>测试用例统计</h2>
-                <table>
-                    <tr>
-                        <th>测试用例</th>
-                        <th>总执行次数</th>
-                        <th>成功次数</th>
-                        <th>失败次数</th>
-                        <th>成功率</th>
-                    </tr>
-            """.format(
-                start_time=self.stats['start_time'].strftime('%Y-%m-%d %H:%M:%S'),
-                end_time=self.stats['end_time'].strftime('%Y-%m-%d %H:%M:%S'),
-                duration=self.stats['total_duration']
-            ))
-            
+
+        # Test statistics
+        start_time = self.stats['start_time'].strftime('%Y-%m-%d %H:%M:%S')
+        end_time = self.stats['end_time'].strftime('%Y-%m-%d %H:%M:%S')
+        duration = self.stats['total_duration']
+
+        # Generate HTML content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>BD2 Load Test Report</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                th {{ background-color: #f2f2f2; }}
+                .success {{ color: green; }}
+                .failed {{ color: red; }}
+            </style>
+        </head>
+        <body>
+            <h1>BD2 Load Test Report</h1>
+            <p><strong>Test Start Time:</strong> {start_time}</p>
+            <p><strong>Test End Time:</strong> {end_time}</p>
+            <p><strong>Total Duration:</strong> {duration:.2f} seconds</p>
+
+            <h2>Test Case Statistics</h2>
+            <table>
+                <tr>
+                    <th>Test Case</th>
+                    <th>Total Executions</th>
+                    <th>Success Count</th>
+                    <th>Failure Count</th>
+                    <th>Success Rate</th>
+                </tr>
+        """
+
+        # Check if there is any test data
+        if self.stats.get('case_stats'):
             for case_name, stats in self.stats['case_stats'].items():
-                success_rate = (stats['success'] / stats['total']) * 100 if stats['total'] > 0 else 0
-                f.write(f"""
-                    <tr>
-                        <td>{case_name}</td>
-                        <td>{stats['total']}</td>
-                        <td class="success">{stats['success']}</td>
-                        <td class="failed">{stats['failed']}</td>
-                        <td>{success_rate:.2f}%</td>
-                    </tr>
-                """)
-            
-            f.write("""
-                </table>
-            </body>
-            </html>
-            """)
+                total = stats['total']
+                success = stats['success']
+                failed = stats['failed']
+                success_rate = (success / total) * 100 if total > 0 else 0
+
+                html_content += f"""
+                <tr>
+                    <td>{case_name}</td>
+                    <td>{total}</td>
+                    <td class="success">{success}</td>
+                    <td class="failed">{failed}</td>
+                    <td>{success_rate:.2f}%</td>
+                </tr>
+                """
+        else:
+            html_content += """
+            <tr>
+                <td colspan="5" style="text-align:center;">No test data available</td>
+            </tr>
+            """
+
+        html_content += """
+            </table>
+        </body>
+        </html>
+        """
+
+        # Write the report file
+        with open(report_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        self.logger.info(f"Test report generated: {report_file}")
+
+
+    # def _generate_report(self):
+    #     """生成测试报告"""
+    #     report_file = os.path.join(self.log_dir, 'load_test_report.html')
         
-        self.logger.info(f"测试报告已生成: {report_file}")
+    #     with open(report_file, 'w', encoding='utf-8') as f:
+    #         f.write("""
+    #         <!DOCTYPE html>
+    #         <html>
+    #         <head>
+    #             <title>BD2 负载测试报告</title>
+    #             <style>
+    #                 body { font-family: Arial, sans-serif; margin: 20px; }
+    #                 table { border-collapse: collapse; width: 100%; }
+    #                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    #                 th { background-color: #f2f2f2; }
+    #                 .success { color: green; }
+    #                 .failed { color: red; }
+    #             </style>
+    #         </head>
+    #         <body>
+    #             <h1>BD2 负载测试报告</h1>
+    #             <p>测试开始时间: {start_time}</p>
+    #             <p>测试结束时间: {end_time}</p>
+    #             <p>总测试时长: {duration:.2f} 秒</p>
+    #             <h2>测试用例统计</h2>
+    #             <table>
+    #                 <tr>
+    #                     <th>测试用例</th>
+    #                     <th>总执行次数</th>
+    #                     <th>成功次数</th>
+    #                     <th>失败次数</th>
+    #                     <th>成功率</th>
+    #                 </tr>
+    #         """.format(
+    #             start_time=self.stats['start_time'].strftime('%Y-%m-%d %H:%M:%S'),
+    #             end_time=self.stats['end_time'].strftime('%Y-%m-%d %H:%M:%S'),
+    #             duration=self.stats['total_duration']
+    #         ))
+            
+    #         for case_name, stats in self.stats['case_stats'].items():
+    #             success_rate = (stats['success'] / stats['total']) * 100 if stats['total'] > 0 else 0
+    #             f.write(f"""
+    #                 <tr>
+    #                     <td>{case_name}</td>
+    #                     <td>{stats['total']}</td>
+    #                     <td class="success">{stats['success']}</td>
+    #                     <td class="failed">{stats['failed']}</td>
+    #                     <td>{success_rate:.2f}%</td>
+    #                 </tr>
+    #             """)
+            
+    #         f.write("""
+    #             </table>
+    #         </body>
+    #         </html>
+    #         """)
+        
+    #     self.logger.info(f"测试报告已生成: {report_file}")
     
     def run(self):
         """运行负载测试"""
@@ -325,7 +385,8 @@ class LoadTest:
         except KeyboardInterrupt:
             self.logger.info("##########  负载测试被用户中断 ##########")
         except Exception as e:
-            self.logger.error(f"##########  负载测试执行失败: {str(e)} ##########")
+            self.logger.error(f"error: {str(e)}")
+            self.logger.error(f"##########  负载测试执行失败 ##########")
         finally:
             # 生成最终报告
             self._generate_report()

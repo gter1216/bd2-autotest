@@ -31,8 +31,8 @@ class CertService(BaseService):
         self.logger = self._get_logger()
         self.ccs_log = ccs_log
         
-    def _write_to_cs_log(self, content: str):
-        """将内容写入 client_console.log 文件
+    def _write_to_ccs_log(self, content: str):
+        """将内容写入 console.log 文件
         
         Args:
             content: 要写入的内容
@@ -40,11 +40,11 @@ class CertService(BaseService):
         try:
             session_dir = LoggerManager.get_session_dir()
             if session_dir:
-                log_file = os.path.join(session_dir, 'client_console.log')
+                log_file = os.path.join(session_dir, 'console.log')
                 with open(log_file, 'a', encoding='utf-8') as f:
                     f.write(f"{content}\n")
         except Exception as e:
-            self.logger.error(f"写入 cs.log 失败: {str(e)}")
+            self.logger.error(f"写入 ccs.log 失败: {str(e)}")
             
     def _handle_ccs_log(self):
         """处理 CCS 日志
@@ -64,7 +64,7 @@ class CertService(BaseService):
                         
                         # 将每条日志写入文件
                         for msg in data:
-                            self._write_to_cs_log(f"[{timestamp}][{log_type}] {msg}")
+                            self._write_to_ccs_log(f"[{timestamp}][{log_type}] {msg}")
             except Exception as e:
                 self.logger.error(f"获取控制台日志失败: {str(e)}")
             

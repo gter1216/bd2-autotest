@@ -1,0 +1,46 @@
+# 忽略 pytest 相关目录
+bd_func_test/
+bd2_func_test.py
+
+# 忽略日志目录
+logs/
+**/logs/
+
+# 忽略缓存文件和目录
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# 忽略临时文件
+**/tmp/
+**/*.tmp
+**/*.log
+
+# 忽略构建目录
+**/build/
+**/dist/
+**/*.egg-info/
+
+# 忽略虚拟环境
+venv/
+env/
+.venv/
+.env/
+
+# 忽略版本控制目录
+.git/
+.svn/
+
+# 忽略大型数据文件目录
+data/
+**/data/
+downloads/
+**/downloads/
+
+# 忽略测试结果和报告目录
+test-results/
+**/test-results/
+reports/
+**/reports/ 

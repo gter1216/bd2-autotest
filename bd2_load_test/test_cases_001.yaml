@@ -1,0 +1,16 @@
+# BD2 负载测试用例集 001
+# 每个测试用例包含以下字段：
+# - name: 测试用例名称
+# - method: 测试用例方法名
+# - params: 测试用例参数
+# - weight: 执行权重（相对频率）
+
+- name: "检查登录状态"
+  method: "auth.get_login_st"
+  params: {}
+  weight: 1
+
+- name: "检查车辆状态"
+  method: "auth.get_vehicle_st"
+  params: {}
+  weight: 2

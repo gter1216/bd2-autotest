@@ -35,7 +35,10 @@ class CLIParser:
             }
             
             # 处理第一个参数：必须是测试用例文件
-            if sys.argv[1].startswith('-'):
+            if sys.argv[1] in ['-h', '--help']:
+                CLIParser._show_help()
+                sys.exit(0)
+            elif sys.argv[1].startswith('-'):
                 click.echo("错误: 第一个参数必须是测试用例文件")
                 sys.exit(1)
                 

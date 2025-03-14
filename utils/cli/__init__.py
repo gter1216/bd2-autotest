@@ -1,6 +1,6 @@
 import sys
 from utils.cli.bd2_client_sim.cli_parser import CLIParser as ClientSimCLIParser
-from utils.cli.bd2_func_test.cli_parser import CLIParser as FuncTestCLIParser
+from utils.cli.bd2_load_test.cli_parser import CLIParser as LoadTestCLIParser
 from utils.cli.factory import CLIParserFactory
 
 class CLIParser:

@@ -8,8 +8,6 @@ basic:
   # vm_password: "*******"  # VM Password for BD2 server
   # sso_username: "charles.xu2"  # SSO Username for BD2 server
   # sso_password: "*******"  # SSO Password for BD2 server
-
-  # 通用日志配置
   basic_vehicle_service_log: off
   uds_log: off
   appl_log: off

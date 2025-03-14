@@ -74,7 +74,7 @@ class CLIParser:
             # 获取动作
             if len(sys.argv) < 3:
                 click.echo(f"错误: 缺少动作参数")
-                click.echo(f"用法: bd2_client_sim.py {task_type} <action> [<args>] [--uds-log] [--cs-log] [--log-level]")
+                click.echo(f"用法: bd2_client_sim.py {task_type} <action> [<args>] [--uds-log] [--ccs-log] [--log-level]")
                 sys.exit(1)  # 错误退出
 
             action = sys.argv[2]
@@ -100,7 +100,7 @@ class CLIParser:
                 arg = sys.argv[i]
                 
                 # 处理可选参数
-                if arg in ['--uds-log', '--cs-log']:
+                if arg in ['--uds-log', '--ccs-log']:
                     if i + 1 >= len(sys.argv):
                         click.echo(f"错误: {arg} 需要一个值 (on/off)")
                         sys.exit(1)
@@ -173,7 +173,7 @@ class CLIParser:
     def _show_help():
         """显示主帮助信息"""
         click.echo("""
-用法: bd2_client_sim.py <task_type> <action> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py <task_type> <action> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 BD2 Client Simulator CLI
 
@@ -189,7 +189,7 @@ BD2 Client Simulator CLI
 
 示例:
     bd2_client_sim.py auth login --uds-log on              # 执行登录操作并启用UDS日志
-    bd2_client_sim.py cert deploy -ecu ccc --cs-log on     # 部署证书到CCC并启用CS日志
+    bd2_client_sim.py cert deploy -ecu ccc --ccs-log on     # 部署证书到CCC并启用CCS日志
     bd2_client_sim.py diag run                             # 运行诊断
 """)
 
@@ -198,7 +198,7 @@ BD2 Client Simulator CLI
         """显示特定任务类型的帮助信息"""
         task_helps = {
             TaskType.AUTH.value: """
-用法: bd2_client_sim.py auth <action> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py auth <action> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 可用的认证操作:
   login          用户登录
@@ -210,7 +210,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py auth get_login_st                    # 检查登录状态
 """,
             TaskType.CERT.value: """
-用法: bd2_client_sim.py cert <action> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py cert <action> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 可用的证书操作:
   init           初始化证书功能
@@ -220,12 +220,12 @@ BD2 Client Simulator CLI
 
 示例:
     bd2_client_sim.py cert init                           # 初始化证书功能
-    bd2_client_sim.py cert deploy -ecu vdf_mcore --cs-log on    # 部署证书到VDF_MCORE并启用CS日志
+    bd2_client_sim.py cert deploy -ecu vdf_mcore --ccs-log on    # 部署证书到VDF_MCORE并启用CCS日志
     bd2_client_sim.py cert revoke -ecu zone_fte         # 撤销ZONE_FTE证书
     bd2_client_sim.py cert get_cert_st -ecu saf         # 获取SAF的证书状态
 """,
             TaskType.DIAG.value: """
-用法: bd2_client_sim.py diag <action> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py diag <action> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 可用的诊断操作:
   run            运行诊断任务
@@ -241,16 +241,16 @@ BD2 Client Simulator CLI
         """显示特定动作的帮助信息"""
         action_helps = {
             (TaskType.AUTH.value, AuthAction.LOGIN.value): """
-用法: bd2_client_sim.py auth login [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py auth login [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 执行用户登录操作
 
 示例:
     bd2_client_sim.py auth login                          # 使用默认配置登录
-    bd2_client_sim.py auth login --uds-log on --cs-log on # 启用所有日志
+    bd2_client_sim.py auth login --uds-log on --ccs-log on # 启用所有日志
 """,
             (TaskType.AUTH.value, AuthAction.GET_LOGIN_ST.value): """
-用法: bd2_client_sim.py auth get_login_st [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py auth get_login_st [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 检查当前用户的登录状态
 
@@ -258,7 +258,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py auth get_login_st                   # 检查登录状态
 """,
             (TaskType.AUTH.value, AuthAction.GET_VEHICLE_ST.value): """
-用法: bd2_client_sim.py auth get_vehicle_st [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py auth get_vehicle_st [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 获取车辆的状态信息
 
@@ -266,7 +266,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py auth get_vehicle_st                 # 获取车辆状态
 """,
             (TaskType.CERT.value, CertAction.INIT.value): """
-用法: bd2_client_sim.py cert init [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py cert init [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 初始化证书功能
 
@@ -274,7 +274,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py cert init                          # 初始化证书功能
 """,
             (TaskType.CERT.value, CertAction.DEPLOY.value): """
-用法: bd2_client_sim.py cert deploy -ecu <type> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py cert deploy -ecu <type> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 部署证书到指定 ECU
 
@@ -283,10 +283,10 @@ BD2 Client Simulator CLI
 
 示例:
     bd2_client_sim.py cert deploy -ecu ccc               # 部署到 CCC
-    bd2_client_sim.py cert deploy -ecu all --cs-log on   # 部署到所有 ECU 并启用CS日志
+    bd2_client_sim.py cert deploy -ecu all --ccs-log on   # 部署到所有 ECU 并启用CCS日志
 """,
             (TaskType.CERT.value, CertAction.REVOKE.value): """
-用法: bd2_client_sim.py cert revoke -ecu <type> [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py cert revoke -ecu <type> [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 撤销指定 ECU 的证书
 
@@ -298,7 +298,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py cert revoke -ecu zone_fte         # 撤销 ZONE_FTE 证书
 """,
             (TaskType.CERT.value, CertAction.GET_CERT_ST.value): """
-用法: bd2_client_sim.py cert get_cert_st [-ecu <type>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py cert get_cert_st [-ecu <type>] [--uds-log] [--ccs-log] [--log-level]
 
 获取证书状态信息
 
@@ -312,7 +312,7 @@ BD2 Client Simulator CLI
     bd2_client_sim.py cert get_cert_st -ecu vdf_mcore   # 获取 VDF_MCORE 的证书状态
 """,
             (TaskType.DIAG.value, DiagAction.RUN.value): """
-用法: bd2_client_sim.py diag run [<args>] [--uds-log] [--cs-log] [--log-level]
+用法: bd2_client_sim.py diag run [<args>] [--uds-log] [--ccs-log] [--log-level]
 
 运行诊断任务
 

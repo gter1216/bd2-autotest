@@ -2,13 +2,11 @@ from typing import Dict, Type
 import os
 from .base import BaseCLIParser
 from .bd2_client_sim.cli_parser import CLIParser as ClientSimCLIParser
-from .bd2_func_test.cli_parser import CLIParser as FuncTestCLIParser
 from .bd2_load_test.cli_parser import CLIParser as LoadTestCLIParser
 
 class CLIParserFactory:
     _parsers: Dict[str, Type[BaseCLIParser]] = {
         'bd2_client_sim.py': ClientSimCLIParser,
-        'bd2_func_test.py': FuncTestCLIParser,
         'bd2_load_test.py': LoadTestCLIParser,
     }
 
