@@ -27,21 +27,21 @@ class LoadTest:
     """负载测试类"""
     
     def __init__(self, test_cases_file: str, duration: Optional[int] = None,
-                 uds_log: bool = False, cs_log: bool = False, 
+                 uds_log: bool = False, ccs_log: bool = False, 
                  log_level: str = None):
         """
         初始化负载测试
         :param test_cases_file: 测试用例集文件路径
         :param duration: 测试持续时间（秒）
         :param uds_log: 是否启用 UDS 日志
-        :param cs_log: 是否启用 CS 日志
+        :param ccs_log: 是否启用 CCS 日志
         :param log_level: 日志级别
         """
         # 设置日志
         if uds_log:
             os.environ['BD2_UDS_LOG'] = 'true'
-        if cs_log:
-            os.environ['BD2_CS_LOG'] = 'true'
+        if ccs_log:
+            os.environ['BD2_CCS_LOG'] = 'true'
         if log_level:
             os.environ['BD2_LOG_LEVEL'] = log_level
         
@@ -63,7 +63,7 @@ class LoadTest:
         self.end_time = None
         
         # 初始化客户端
-        self.client = BD2ClientSim(uds_log=uds_log, cs_log=cs_log, log_level=log_level)
+        self.client = BD2ClientSim(uds_log=uds_log, ccs_log=ccs_log, log_level=log_level)
         
         # 加载测试用例
         self.test_cases = self._load_test_cases()
@@ -146,6 +146,7 @@ class LoadTest:
         :return: 是否成功
         """
         try:
+            self.logger.info("############## 负载测试 tear up 开始 ##############")
             # 登录
             self.logger.info("开始登录流程")
             login_result = self.client.run_task('auth', 'login')
@@ -161,10 +162,12 @@ class LoadTest:
                 return False
             
             self.logger.info("登录和车辆状态检查成功")
+            self.logger.info("############## 负载测试 tear up 结束 ##############")
             return True
             
         except Exception as e:
             self.logger.error(f"登录或检查车辆状态失败: {str(e)}")
+            self.logger.info("############## 负载测试 tear up 失败，退出 ##############")
             return False
     
     def _update_case_stats(self, case_name: str, success: bool):
@@ -276,7 +279,7 @@ class LoadTest:
             total_weight = sum(case['weight'] for case in self.test_cases)
             
             # 开始测试循环
-            self.logger.info("开始负载测试")
+            self.logger.info("##########  开始负载测试 ##########")
             while True:
                 # 检查是否达到测试时间
                 if self.duration and (datetime.now() - self.start_time).total_seconds() >= self.duration:
@@ -317,12 +320,12 @@ class LoadTest:
             # 生成测试报告
             self._generate_report()
             
-            self.logger.info("负载测试完成")
+            self.logger.info("##########  负载测试完成 ##########")
             
         except KeyboardInterrupt:
-            self.logger.info("测试被用户中断")
+            self.logger.info("##########  负载测试被用户中断 ##########")
         except Exception as e:
-            self.logger.error(f"测试执行失败: {str(e)}")
+            self.logger.error(f"##########  负载测试执行失败: {str(e)} ##########")
         finally:
             # 生成最终报告
             self._generate_report()

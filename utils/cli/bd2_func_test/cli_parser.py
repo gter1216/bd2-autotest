@@ -53,7 +53,7 @@ class CLIParser:
             # 初始化参数字典
             bd2_args = {
                 'uds_log': False,       # UDS日志
-                'cs_log': False,        # CS日志
+                'ccs_log': False,        # CCS日志
                 'console_log': False,   # 控制台日志
                 'log_level': None       # 日志级别
             }
@@ -120,7 +120,7 @@ BD2 功能测试工具
 
 BD2 参数:
   --uds-log on|off      启用/禁用 UDS 日志
-  --cs-log on|off       启用/禁用 CS 日志
+  --ccs-log on|off       启用/禁用 CCS 日志
   --console-log on|off  启用/禁用控制台日志
   --log-level LEVEL     设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   -h, --help            显示帮助信息

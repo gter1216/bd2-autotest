@@ -20,19 +20,19 @@ from utils.logger_manager import LoggerManager
 class CertService(BaseService):
     """证书服务类"""
     
-    def __init__(self, base_url, cs_log: bool = False):
+    def __init__(self, base_url, ccs_log: bool = False):
         """初始化证书服务
         
         Args:
             base_url: 基础URL
-            cs_log: 是否启用 CS 日志
+            ccs_log: 是否启用 CCS 日志
         """
         super().__init__(base_url)
         self.logger = self._get_logger()
-        self.cs_log = cs_log
+        self.ccs_log = ccs_log
         
     def _write_to_cs_log(self, content: str):
-        """将内容写入 console.log 文件
+        """将内容写入 client_console.log 文件
         
         Args:
             content: 要写入的内容
@@ -40,18 +40,18 @@ class CertService(BaseService):
         try:
             session_dir = LoggerManager.get_session_dir()
             if session_dir:
-                log_file = os.path.join(session_dir, 'console.log')
+                log_file = os.path.join(session_dir, 'client_console.log')
                 with open(log_file, 'a', encoding='utf-8') as f:
                     f.write(f"{content}\n")
         except Exception as e:
             self.logger.error(f"写入 cs.log 失败: {str(e)}")
             
-    def _handle_cs_log(self):
-        """处理 CS 日志
+    def _handle_ccs_log(self):
+        """处理 CCS 日志
         
-        如果启用了 cs_log，获取并记录控制台日志
+        如果启用了 ccs_log，获取并记录控制台日志
         """
-        if self.cs_log:
+        if self.ccs_log:
             try:
                 console_logs_url = EndpointManager.get_endpoint("cert_console_logs")
                 _, logs_response = self.get(console_logs_url, no_log=True)
@@ -85,27 +85,27 @@ class CertService(BaseService):
             # 如果状态码不是200，直接返回错误
             if status_code != 200:
                 self.logger.error(f"证书功能初始化失败，状态码: {status_code}")
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"status_code": status_code},
                     f"证书功能初始化失败，状态码: {status_code}"
                 )
                 
-            # 处理 CS 日志
-            self._handle_cs_log()
+            # 处理 CCS 日志
+            self._handle_ccs_log()
             
             return Result.success({"status_code": status_code})
                 
         except requests.Timeout:
             self.logger.error("证书功能初始化超时")
-            self._handle_cs_log()
+            self._handle_ccs_log()
             return Result.error(
                 {"timeout": True},
                 "证书功能初始化超时（5秒）"
             )
         except Exception as e:
             self.logger.error(f"证书功能初始化异常: {str(e)}")
-            self._handle_cs_log()
+            self._handle_ccs_log()
             return Result.error(
                 {"exception": str(e)},
                 f"证书功能初始化异常: {str(e)}"
@@ -150,7 +150,7 @@ class CertService(BaseService):
             
             if status_code != 200:
                 self.logger.error(f"获取证书状态失败，状态码: {status_code}")
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"status_code": status_code},
                     f"获取证书状态失败，状态码: {status_code}"
@@ -158,7 +158,7 @@ class CertService(BaseService):
             
             if not ecus_response:
                 self.logger.error("获取证书状态失败：响应为空")
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error({"error": "获取证书状态失败：响应为空"})
             
             # 提取需要的信息
@@ -169,7 +169,7 @@ class CertService(BaseService):
             if ecu:
                 ecus = [e for e in ecus if e.get('ecu', '').lower() == ecu.lower()]
                 if not ecus:
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     return Result.error(
                         {"error": f"未找到 ECU: {ecu}"},
                         f"未找到 ECU: {ecu}"
@@ -196,8 +196,8 @@ class CertService(BaseService):
                 
                 self.logger.info("\n".join(ecu_log))
             
-            # 处理 CS 日志
-            self._handle_cs_log()
+            # 处理 CCS 日志
+            self._handle_ccs_log()
             
             # 构造返回结果
             return Result.success({
@@ -221,7 +221,7 @@ class CertService(BaseService):
             
         except Exception as e:
             self.logger.error(f"获取证书状态异常: {str(e)}")
-            self._handle_cs_log()
+            self._handle_ccs_log()
             return Result.error({"error": f"获取证书状态异常: {str(e)}"})
 
     def deploy_cert(self, ecu: str) -> Result:
@@ -245,7 +245,7 @@ class CertService(BaseService):
             }
             
             if ecu not in x_map:
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"error": f"无效的 ECU 类型: {ecu}"},
                     f"无效的 ECU 类型: {ecu}"
@@ -260,7 +260,7 @@ class CertService(BaseService):
             })
             
             if status_code != 202:
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"status_code": status_code},
                     f"部署证书失败，状态码: {status_code}"
@@ -275,7 +275,7 @@ class CertService(BaseService):
                 # 检查是否超时
                 if time.time() - start_time > timeout:
                     self.logger.warning("部署证书超时（600秒）")
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus, "timeout": True},
@@ -293,7 +293,7 @@ class CertService(BaseService):
                 status_code, ecus_response = self.get(EndpointManager.get_endpoint("cert_ecus"))
 
                 if status_code != 200:
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     return Result.error(
                         {"status_code": status_code},
                         f"获取证书状态失败，状态码: {status_code}"
@@ -319,7 +319,7 @@ class CertService(BaseService):
                 if code == 0:  # 正在进行
                     continue
                 elif code == 1:  # 成功
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus},
@@ -327,7 +327,7 @@ class CertService(BaseService):
                         )
                     return Result.success({"message": "证书部署成功"})
                 elif code == 2:  # 失败
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus},
@@ -340,7 +340,7 @@ class CertService(BaseService):
                     
         except Exception as e:
             self.logger.error(f"部署证书异常: {str(e)}")
-            self._handle_cs_log()
+            self._handle_ccs_log()
             return Result.error(
                 {"error": f"部署证书异常: {str(e)}"}
             )
@@ -365,7 +365,7 @@ class CertService(BaseService):
             }
             
             if ecu not in x_map:
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"error": f"无效的 ECU 类型: {ecu}"},
                     f"无效的 ECU 类型: {ecu}"
@@ -380,7 +380,7 @@ class CertService(BaseService):
             })
             
             if status_code != 202:
-                self._handle_cs_log()
+                self._handle_ccs_log()
                 return Result.error(
                     {"status_code": status_code},
                     f"撤销证书失败，状态码: {status_code}"
@@ -395,7 +395,7 @@ class CertService(BaseService):
                 # 检查是否超时
                 if time.time() - start_time > timeout:
                     self.logger.warning("撤销证书超时（600秒）")
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus, "timeout": True},
@@ -413,7 +413,7 @@ class CertService(BaseService):
                 status_code, ecus_response = self.get(EndpointManager.get_endpoint("cert_ecus"))
 
                 if status_code != 200:
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     return Result.error(
                         {"status_code": status_code},
                         f"获取证书状态失败，状态码: {status_code}"
@@ -439,7 +439,7 @@ class CertService(BaseService):
                 if code == 0:  # 正在进行
                     continue
                 elif code == 1:  # 成功
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus},
@@ -447,7 +447,7 @@ class CertService(BaseService):
                         )
                     return Result.success({"message": "证书撤销成功"})
                 elif code == 2:  # 失败
-                    self._handle_cs_log()
+                    self._handle_ccs_log()
                     if failed_ecus:
                         return Result.error(
                             {"failed_ecus": failed_ecus},
@@ -460,7 +460,7 @@ class CertService(BaseService):
                     
         except Exception as e:
             self.logger.error(f"撤销证书异常: {str(e)}")
-            self._handle_cs_log()
+            self._handle_ccs_log()
             return Result.error(
                 {"error": f"撤销证书异常: {str(e)}"}
             )

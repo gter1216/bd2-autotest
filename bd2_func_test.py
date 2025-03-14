@@ -18,7 +18,7 @@ from utils.logger_manager import LoggerManager
 #     """BD2 功能测试类"""
     
 #     def __init__(self, test: Optional[str] = None, group: Optional[str] = None,
-#                  run_all: bool = False, uds_log: bool = False, cs_log: bool = False,
+#                  run_all: bool = False, uds_log: bool = False, ccs_log: bool = False,
 #                  log_level: Optional[str] = None, console_log: bool = False):
 #         """
 #         初始化功能测试
@@ -26,7 +26,7 @@ from utils.logger_manager import LoggerManager
 #         :param group: 功能组
 #         :param run_all: 是否运行所有测试
 #         :param uds_log: 是否启用 UDS 日志
-#         :param cs_log: 是否启用 CS 日志
+#         :param ccs_log: 是否启用 CCS 日志
 #         :param log_level: 日志级别
 #         :param console_log: 是否输出日志到控制台
 #         """
@@ -34,7 +34,7 @@ from utils.logger_manager import LoggerManager
 #         self.group = group
 #         self.run_all = run_all
 #         self.uds_log = uds_log
-#         self.cs_log = cs_log
+#         self.ccs_log = ccs_log
 #         self.log_level = log_level
 #         self.console_log = console_log
         
@@ -67,7 +67,7 @@ from utils.logger_manager import LoggerManager
 #         # 添加日志相关参数
 #         if self.uds_log:
 #             args.append('--uds-log')
-#         if self.cs_log:
+#         if self.ccs_log:
 #             args.append('--cs-log')
 #         if self.log_level:
 #             args.extend(['--log-level', self.log_level])
@@ -101,7 +101,7 @@ def main():
         # 设置日志配置
         if bd2_args['uds_log']:
             os.environ['BD2_UDS_LOG'] = 'true'
-        if bd2_args['cs_log']:
+        if bd2_args['ccs_log']:
             os.environ['BD2_CS_LOG'] = 'true'
         if bd2_args['console_log']:
             os.environ['BD2_CONSOLE_LOG'] = 'true'

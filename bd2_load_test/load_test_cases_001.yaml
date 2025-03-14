@@ -6,8 +6,10 @@
 
 - name: "检查登录状态"
   method: "auth.get_login_st"
+  params: {}
   weight: 1
 
 - name: "检查车辆状态"
   method: "auth.get_vehicle_st"
+  params: {}
   weight: 2

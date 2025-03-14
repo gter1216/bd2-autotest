@@ -184,7 +184,7 @@ BD2 Client Simulator CLI
 可选参数:
   -h, --help    显示帮助信息
   --uds-log     UDS 日志开关 (on/off)
-  --cs-log      CS 日志开关 (on/off)
+  --ccs-log      CCS 日志开关 (on/off)
   --log-level   设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 示例:

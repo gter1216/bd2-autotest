@@ -30,7 +30,7 @@ class CLIParser:
                 'test_cases_file': None,  # 测试用例文件
                 'duration': None,         # 测试持续时间（秒）
                 'uds_log': False,         # UDS日志
-                'cs_log': False,          # CS日志
+                'ccs_log': False,         # CCS日志
                 'log_level': None         # 日志级别
             }
             
@@ -87,15 +87,15 @@ class CLIParser:
                     args['uds_log'] = (value == 'on')
                     i += 2
                     
-                elif arg == '--cs-log':
+                elif arg == '--ccs-log':
                     if i + 1 >= len(sys.argv):
-                        click.echo("错误: --cs-log 需要一个值 (on/off)")
+                        click.echo("错误: --ccs-log 需要一个值 (on/off)")
                         sys.exit(1)
                     value = sys.argv[i + 1]
                     if value not in ['on', 'off']:
-                        click.echo("错误: --cs-log 的值必须是 on 或 off")
+                        click.echo("错误: --ccs-log 的值必须是 on 或 off")
                         sys.exit(1)
-                    args['cs_log'] = (value == 'on')
+                    args['ccs_log'] = (value == 'on')
                     i += 2
                     
                 elif arg == '--log-level':
@@ -133,7 +133,7 @@ BD2 负载测试工具
 选项:
   -t, --time <分钟>     测试持续时间（分钟）
   --uds-log on|off      启用/禁用 UDS 日志
-  --cs-log on|off       启用/禁用 CS 日志
+  --ccs-log on|off      启用/禁用 CCS 日志
   --log-level LEVEL     设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   -h, --help            显示帮助信息
 
@@ -144,12 +144,12 @@ BD2 负载测试工具
   # 设置测试时间（例如运行 60 分钟）
   bd2_load_test.py load_test_cases_001.yaml -t 60
 
-  # 启用 UDS 日志和 CS 日志
-  bd2_load_test.py load_test_cases_001.yaml --uds-log on --cs-log on
+  # 启用 UDS 日志和 CCS 日志
+  bd2_load_test.py load_test_cases_001.yaml --uds-log on --ccs-log on
 
   # 设置日志级别
   bd2_load_test.py load_test_cases_001.yaml --log-level DEBUG
 
   # 组合使用
-  bd2_load_test.py load_test_cases_001.yaml -t 60 --uds-log on --cs-log on --log-level DEBUG
+  bd2_load_test.py load_test_cases_001.yaml -t 60 --uds-log on --ccs-log on --log-level DEBUG
 """)

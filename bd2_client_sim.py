@@ -16,19 +16,19 @@ import json
 class BD2ClientSim:
     """BD2 客户端模拟器类"""
     
-    def __init__(self, uds_log: bool = False, cs_log: bool = False, 
+    def __init__(self, uds_log: bool = False, ccs_log: bool = False, 
                  log_level: str = None):
         """
         初始化客户端模拟器
         :param uds_log: 是否启用 UDS 日志
-        :param cs_log: 是否启用 CS 日志
+        :param ccs_log: 是否启用 CCS 日志
         :param log_level: 日志级别
         """
         # 设置日志
         if uds_log:
             os.environ['BD2_UDS_LOG'] = 'true'
-        if cs_log:
-            os.environ['BD2_CS_LOG'] = 'true'
+        if ccs_log:
+            os.environ['BD2_CCS_LOG'] = 'true'
         if log_level:
             os.environ['BD2_LOG_LEVEL'] = log_level
         
@@ -51,7 +51,7 @@ class BD2ClientSim:
         
         # 初始化服务
         self.auth = AuthService(self.base_url)
-        self.cert = CertService(self.base_url, cs_log=cs_log)
+        self.cert = CertService(self.base_url, ccs_log=ccs_log)
         
     def run_task(self, task_type: str, action: str, **kwargs) -> Dict[str, Any]:
         """
@@ -153,7 +153,7 @@ class BD2ClientSim:
         # 创建实例
         client = cls(
             uds_log=args.get('uds_log', False),
-            cs_log=args.get('cs_log', False),
+            ccs_log=args.get('ccs_log', False),
             log_level=args.get('log_level')
         )
         
