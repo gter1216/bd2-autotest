@@ -1,6 +1,8 @@
 # log
 logs/
 
+
+
 # Session data
 /var/session/
 
@@ -14,6 +16,9 @@ __pycache__/
 
 # company private
 parse_diag_table/data/
+
+# cursor ignore content
+.cursorignorecontent
 
 # Distribution / packaging
 .Python
