@@ -62,7 +62,7 @@ pip install ipykernel -i https://mirrors.aliyun.com/pypi/simple/
 Ubuntu 上运行：
 tmux new -s jupyter
 mamba activate rn50_study
-jupyter notebook --no-browser --ip=10.110.179.241 --port=8990
+jupyter notebook --no-browser --ip=192.168.0.100 --port=8990
 ctrl +b 再按下 d
 tmux ls
 tmux attach -t jupyter
@@ -70,6 +70,7 @@ tmux attach -t jupyter
 Windows 上运行：
 http://10.110.179.241:8990/tree
 
+http://192.168.0.100:8990/tree?token=c0ac5f603f5f8689773ec289483fd7bb1f567e22f870795e
 
 需要安装的包：
 mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
