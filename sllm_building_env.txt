@@ -57,8 +57,8 @@ print(torch.version.cuda)          # '11.8'
 print(torch.cuda.is_available())   # True ✅
 print(torch.cuda.get_device_name(0))  # eg. 'NVIDIA GeForce RTX 3090'
 
-mamba instal jupyter notebook
-
+pip install notebook -i https://mirrors.aliyun.com/pypi/simple/
+pip install ipykernel -i https://mirrors.aliyun.com/pypi/simple/
 Ubuntu 上运行：
 tmux new -s jupyter
 mamba activate rn50_study
